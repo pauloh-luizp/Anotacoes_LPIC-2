@@ -35,6 +35,111 @@ cpu wa - tempo gasto à espera de I/O
 cpu st - tempo roubado de uma máquina virtual
 
 
+005. 201.1 Medir e Resolver Problemas de Uso de Recursos===============
+==sar==================================================================
+
+O comando 'sar' vem junto com o pacote sysstat. No Debian para haibili_
+  _tar a coleta de logs é necessário editarmos o arquivo e depois rodar
+  os comandos:
+    /etc/default/sysstat e trocar a variável ENABLE para "true"
+    systemctl start sysstat.service
+    systemctl enable systat.service
+
+O sysstat coleta pois ele tem uma entrada adicionado na CRON pelas as 
+  entradas 'sa1' e 'sadc'
+
+O 'sadc' é o coletor de dados do sistema
+O 'sa1' coleta e armazena dados binário da atividade do sistema
+
+No Debian os logs ficam em: /var/log/sysstat
+No CentOS os logs ficam em: /var/log/sa
+
+Opções do comando 'sar':
+  -f <'sa[numero do arquivo]'> permite ler os arquivos de dias anteriores
+  -u mostra os dados de CPU
+  -r mostra os dados de memória
+  -S mostra dados referente a swap
+  -n DEV mostra dados referente a interfaces de redes
+  -d mostra a escrita em disco
+  -B mostra dos dados de paginação de memória
+
+
+006. 201.1 Medir e Resolver Problemas de Uso de Recursos===============
+==netstat, ss iptraf===================================================
+
+O comando 'netstat' mostra as conexões de redes, tabela de roteamento
+  estatísiticas
+  -i mostra todas as interfaces e as estatítiscas delas
+  -s mostra as estatícias por protocolo
+  -a mostra todos os sockets
+  
+O comando 'ss' é semelhante ao 'netstat'. O netstat pega as informações
+  do /proc e o ss pega diretamente da memória do kernel
+  -s mostra uma estatísitca resumida
+  -l conexões em estado listen
+  -t conexões TCP
+  -n não resolve os IPs e números de porta, exibe apenas números
+
+O comando 'iptraf' e 'iptraf-ng'  monitora o tráfego da interfaces de
+  rede em tempo real
+
+
+007. 201.1 Medir e Resolver Problemas de Uso de Recursos===============
+==Processos============================================================
+  
+O comando 'ps' mostra as informações referentes aos processos
+  VSZ - Virtual Memory Size - toda memória que o processo pode acessar
+  RSS - Resident Set Size - toda memória que está alocada para esse 
+    processo
+  -ely mostra os processos que estão dormentes (possuem um D no inicio)
+
+
+O comando 'pstree' mostra os processos em forma de arvore
+
+O comando 'w' mostra quem está conectado na maquina e os processos que
+  cada um está usando e os recurso consumidos
+
+O comando 'lsof' identifica processos com arquivos, lista os arquivos
+  abertos pelos processos
+  -p <número do processo> lista os arquivos abertos pelo aquele 
+    processo
+  lsof <nome do arquivo> mostra quem criou aquele arquivo
+
+
+008. 201.1 Medir e Resolver Problemas de Uso de Recursos===============
+==top, htop e iotop====================================================
+
+O comando 'top' exibe as informações dos processo rodando e o uso de
+  recuros, exibe informações do último minuto, do últimos 5 min e dos 
+  últimos 15 min
+  
+  Aperando Shift + f abrimos para escolher o fields, apertando "espaço"
+  selecionamos para exibir e apertando "s" ordenamos por este campo
+
+O comando 'htop' é uma melhoria do 'top'
+  Aperando "l" lista os arquivos abertos pelo processo
+  -p <PID> mostra somente os recursos consumidos pelos esses processo
+  -d <numero> delay para exibição em divisores de 10, ex: 100 = 10 seg
+
+O comando 'iotop' mostra os processo que estão fazendo I/O
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 MUDAR

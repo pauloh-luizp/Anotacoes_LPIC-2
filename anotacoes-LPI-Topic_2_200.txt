@@ -124,6 +124,13 @@ O comando 'htop' é uma melhoria do 'top'
 O comando 'iotop' mostra os processo que estão fazendo I/O
 
 
+008. 201.1 Medir e Resolver Problemas de Uso de Recursos===============
+==Swap, uptime e free==================================================
+  
+O comando 'uptime' exibe a carga média dos últimos 1, 5 e 15 min
+	e o tempo de uptime
+
+O comando 'free' lista a quatidade de memória livre
 
   
 

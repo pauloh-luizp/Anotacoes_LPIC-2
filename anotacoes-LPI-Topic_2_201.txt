@@ -1,0 +1,149 @@
+TÓPICO 201: Kernel Linux===============================================
+=======================================================================
+015. 201.1 Componentes do Kernel=======================================
+=======================================================================
+
+O Kernel do Linux é Monolitico modular, o monolito é implementado em
+  um processo só em que a imagem do kernel é carregado em memória.
+  O Kernel do Linux possui modulos que são chamados de forma independe_
+  tes, como um modulo para placa de vídeo, USB e outros.
+
+No Microkernel é um controlado principal em que o existe os servers
+  que são subprocessos do kernel que conversa com os softwares
+
+www.kernel.org
+
+mainline: versão atual do Kernel
+  rc = release candidate
+
+stable: ultima versão estável
+  EOL = End Of Life
+
+longterm = versões anteriores que ainda são mantidas, recebendo atua_
+  lizações de segurança
+
+x.yy.z
+  x = versão do kernel
+  yy = numero da release principal
+  z = os incrementos da release atual, patchs
+
+'uname -r' para ver a versão do kernel utilizada
+
+
+016. 201.1 Componentes do Kernel=======================================
+==Arquivos e localização===============================================
+
+Os arquivos de fonte do Kernel ficam em /usr/src
+
+Nos headers estão as implementações do drives, são os .h dos codigos 
+  em C
+
+As fontes do Kernel estão compactadas utilizando o xz
+
+Para descompactar usamos o tar:
+  'tar xvf linux-4.16.9.tar.xz'
+
+É comum ter um link simbólico apontando para a versão do kernel a ser
+  utilizado, pois podemos ter mais de uma versão de kernel
+  'ln -s linux-4.16.9 linux
+
+No diretório /usr/src/linux/Documentation temos a documentação do 
+  kernel
+
+A imagem compilada do kernel atual fica em /boot o arquivo vmlinuz*
+  é do tipo bzImage. O bzImage é carregado na parte alta da memoria
+  Usa a compressao por gzip
+
+Os módulos do kernel ficam em /lib/modules e tem extensões .ko
+
+
+
+018. 201.2 Compilando o Kernel=======================================
+==Configuração=======================================================
+
+Para a configuração é necessário instalar alguns pacotes, então 
+  instalamos os pacotes:
+    No Debian: build-essential, 
+    No CentOS: yum groupinstall "Development Tools"
+
+Dentro do diretório onde está o kernel rodamos 'make config', faz a
+  configuração baseando em perguntas
+
+Podemos usar o 'make menuconfig'
+
+Compilar um outro kernel permite habilitar coisas que por padrão vem
+  desabilitadas
+
+<M> irá ser compilado como modulo
+<*> integrado com o kernel built-in
+
+As configurações de personalização do kernel ficam em:
+  /usr/src/linux/.config
+
+Podemos pegar um .config que já existe e restaura-lo usando o 
+  'make oldconfig', ele vai pegar o config anterior e faz um backup
+  dele e faz um novo config
+
+Podemo usar o 'make xconfig' que usa a interface X e o 'make gconfig'
+  que usua a interface GTK+
+
+O arquivo "Makefile" indica como será compilado o kernel. Dentro do 
+  arquivo podemos definir um EXTRAVERSION
+  O EXTRAVERSION é um numero a mais na versão do sublevel
+
+No arquivo .config temos o CONFIG_LOCALVERSION
+  O LOCALVERSION é um outro sufixo que nomea a compilacao que 
+    estamos fazendo
+
+
+019. 201.2 Compilando o Kernel=======================================
+==Compilação=========================================================
+
+Para compilar o kernel  podemos usar o 'make zImage' ou 'make bzImage'
+  O processo pode levar horas e ocupar mais de 20GB
+ -j2 permite compilar com dois processos em paralelo
+ 
+Para compilar os modulos usamos 'make modules'
+
+Para limpar a compilação usamos o 'make clean' ou 'make mrproper'
+  O mrproper limpa também o .config e os demais arquivos compilados
+  O clean limpa apena os arquivos compilados
+
+
+
+020. 201.2 Compilando o Kernel=======================================
+==Instalação=========================================================
+
+Primeiro instalamos os modulos com o comando 'make modules_install'
+  rodando no diretório /usr/src/linux
+
+Para compilarmos o arquivo de imagem vamos até o diretório contendo
+  a imagem: /usr/src/linux/arch/x86/boot, copiamos até o /boot
+ 
+Podemos também dar apenas o comando 'make install'
+
+Ou ainda pelo comando :
+  'makinitramfs -o /boot/initrd.img-4.16.9 4.16.9'
+  e depois
+  'update-grub'
+
+Ou pelo comando: 'update-initramfs -c -k 4.16.9'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -130,6 +130,28 @@ Ou ainda pelo comando :
 Ou pelo comando: 'update-initramfs -c -k 4.16.9'
 
 
+021. 201.2 pacotes dkms dracut=======================================
+=====================================================================
+
+O comando 'make deb-pkg' permite gerar pacotes .deb
+O comando 'make rpm-pkg' permite gerar pacotes .rpm
+O comando 'make binrpm-pgk' gerar a imagem rpm compilada
+
+A Dell criou o dkms (Dynamic Kernel Module Support) para resolver 
+	os modulos que não eram compilados durante uma atulização de 
+	kernel do Linux
+	
+O arquivo 'dkms.conf' dita as configurações aplicadas ao modulo duran_
+	te uma atualização do Kernel do Linux
+	
+O 'dracut' é semelhante ao initramfs do debiam, porem para o red hat
+
+O comando 'make clean' irá limpar os arquivos compilados, mantendo os
+	arquivos fontes
+
+O comando 'make mrproper' irá limpart todos os arquivos compilados e 
+	os arquivos fontes e de configuração.
+
 
 
 

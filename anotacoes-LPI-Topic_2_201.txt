@@ -153,19 +153,31 @@ O comando 'make mrproper' irá limpart todos os arquivos compilados e
 	os arquivos fontes e de configuração.
 
 
+O comando 'modinfo' lista os detalhes especificos de um modulo
 
+O comando 'ismod' carrega um modulo
 
+O comando 'rmmod' remove um modulo
 
+O comando 'modprobe' carrega um modulo verificando as dependências
 
+No arquivo '/etc/modules' colocamos o nome dos arquivos de modulos 
+	que queremos que sejam carregados durante a inicialização
 
+	
+025. 201.3 Kernel em Tempo Real======================================
+==Udev===============================================================
 
+O Udev é o device manager. Gerencia por exemplo os device lá no /sys
+	e no /dev, quando é adiconado um HD externo por exemplo.
+	
+O comando 'udevadm monitor' mostra os eventos que vem do udev e o do 
+	kernel.
 
-
-
-
-
-
-
-
+As ações que o Udev tomam ficam no arquivo de configuração 
+	'/etc/udev/udev.conf'
+	
+Os arquivos de regras ficam em '/etc/udev/rules.d/ que podem estar em
+	'/lib/udev/rules.d/'
 
 

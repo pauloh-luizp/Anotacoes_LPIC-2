@@ -1,0 +1,74 @@
+TÓPICO 202: System Startup=============================================
+=======================================================================
+030. 202.1 Customizando o Sistema de Inicialização SysV-init===========
+=======================================================================
+
+O arquivo de configuração do SysV é o '/etc/inittab'
+
+Runlevels 
+	0 - halt (desliga a maquina)
+	6 - reboot (reinicia a maquina)
+	1 - single-user
+	2-5 - multi-user
+	
+Em '/etc/init.d' é onde está os scripts de inicialização do demais 
+	serviços e processos.
+	
+Os diretórios de cada runlevel ficam em: '/etc/rc*.d
+	Dentro do diretórios temos diversos links.
+	Quando o nome começa com 'S' significa startup
+	Quando o nome começa com 'K' significa kill
+	O numero 01 indica a ordem de inicialização dos processos
+
+Podemos atualizar os processos a serem executados ou mortos pelo
+	runlevel utilizando o comando 
+	'update-rc.d <processo> (en)(di)sable <runlevel>'
+	podemos restaurar o default usando o comando 
+	'update-rc.d <processo> 
+	
+O comando 'runlevel' exibe o runlevel que estamos atualmente
+
+O comando 'init' irá mudar de runlevel
+
+O comando 'telinit' também irá mudar de runlevel
+
+
+031. 202.1 Customizando o Sistema de Inicialização SysV-init===========
+==systemd==============================================================
+
+A configuração do systemd ficam em: '/lib/systemd/system' ou em
+	'/etc/systemd/system' ou em '/run/systemd/system'
+	Dentro temos as varias units
+	A prioridade é dada pela ordem:
+		/etc/systemd/system
+		/run/systemd/system
+		/lib/systemd/system
+		
+O comando 'systemd-delta' procura configurações que estão 
+	se sobreecrevendo
+
+
+O comando 'systemctl' é muito vasto.
+
+
+032. 202.1 Customizando o Sistema de Inicialização SysV-init===========
+==lsb==================================================================
+
+LSB (Linux Stadard Base) é um padrão Linux que padroniza as bibliotecas
+	comandos, sistema de arquivos e modulos.
+	
+
+034. 202.2 Recuperação do Sistema======================================
+==Boot e GRUB==========================================================
+
+As configurações do GRUB ficam em: '/etc/default/grub.cfg'
+
+As definições ficam em: '/etc/grub.d/'
+
+Na inicialização do sistema é apresentado o GRUB e podemos editar
+	as opções digitando 'E'
+	
+Podemos iniciar o /bin/bash e com isso rodar um fsck na partição /
+	Para torna-la novamente read and write rodamos o comando
+		'mount -o remount,rw /'
+		

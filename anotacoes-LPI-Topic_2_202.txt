@@ -72,3 +72,43 @@ Podemos iniciar o /bin/bash e com isso rodar um fsck na partição /
 	Para torna-la novamente read and write rodamos o comando
 		'mount -o remount,rw /'
 		
+035. 202.2 Recuperação do Sistema======================================
+==GRUB Shell===========================================================
+
+Pressionando a tecla 'C' vamos para command line do GRUB
+  No command line podemos vizualizar maiores informações sobre a 
+  a partições
+
+No command line se digitarmos 'ls -l (hd0,msdos1)' ele trará informa_
+  ções sobre a partição, se acrescentarmos um / ao final ele trará
+  o conteudo da partigção 'ls -l (hd0,msdos1)/'
+
+!!!!
+Quando há problemas na inicialização podemos fazer:
+  Setar um novo diretório /boot
+    'set root=(hd0,msdos1)'
+  Definir o novo kernel
+    linux <nome do kernel> root='local da partição raiz' 
+    linux /vmlinuz-4.9.0-6-amd64 root=/dev/sda3
+  Configuramos o initrd
+    initrd /initrd.img-4.9.0-6-amd64
+  Depois damos o comando
+    boot
+
+
+036. 202.2 Recuperação do Sistema======================================
+==UEFI=================================================================
+
+Não lê os dados da MBR
+Obtêm os bootloaders pelo ESP (EFI System Partition)
+  Montada no diretório /boot/efi/
+  Utiliza um filesystem do tipo FAT
+
+Configurado pelo UEFI Boot Manager pelo comando 'efibootmgr'
+  -v trás mais informações sobre os bootloaders
+
+Os bootloaders ficam em '/boot/efi/EFI/ubuntu'
+
+
+037. 202.2 Recuperação do Sistema======================================
+==Recuperação na prática===============================================

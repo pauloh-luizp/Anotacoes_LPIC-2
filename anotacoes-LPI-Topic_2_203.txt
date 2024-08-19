@@ -1,0 +1,139 @@
+TÓPICO 202: Sistema de arquivos & dispositivos=========================
+=======================================================================
+044. 203.1 Operando o Sistema de Arquivos Linux========================
+==fstab================================================================
+
+O arquivo de configuração do fstab ficam em "/etc/fstab"
+
+Contém os campos: 
+Identificação do Device (UUID) | Ponto de montagem | Tipo de particacao
+	| Opções | Dump | Pass
+	
+Dump é usado para a backup, não mais utilizado
+Pass se essa partição será sempre verificado pelo fsck
+
+FILESYSTEM-INDEPENDENT MOUNT OPTIONS
+	async - grava de forma assincrona no disco, gravando antes em um 
+		cache
+	sync - grava de forma direta no disco
+	auto - o diretorio será montado no boot do sistema
+	noauto - o diretorio não será montado no boot do sistema
+	defaults - inclui as opções: rw, suid, dev, exec, auto, nouser e
+		async
+	dev - vão ser interpretados os caractes ou blocos especiais do /dev
+	exec - permite a execução de binários
+	no exec - não permite a execução de binários
+	group - permite que um usuário normal faça a montagem do file system
+		se esse usuário for parte do grupo de usuário daquele que montou
+	suid - permissões expeciais
+	owner - permite que um usuário comum monte o file system se ele for
+		o dono da partição
+	remount - remonta a partição 
+	ro - read only
+	rw - read write
+	user - permite que qualquer usuário possa montar o file system
+		mas só quem montou pode desmontar
+	users - qualquer usuário pode montar ou desmontar a particao
+	no user - somente o root pode montar ou desmontar a partição
+	
+
+045. 203.1 Operando o Sistema de Arquivos Linux========================
+==Comandos úteis=======================================================
+
+O comando 'mount' exibe as partições montadas
+	-a monta tudo que está com auto no fstab
+	-t expecifica o tipo de particionamento ext4, ntfs
+	-o expecifica as opções de montagem da partição
+	-U permite expecificar o UUID de um disco, ou UUID=
+	LABEL=label da partição
+	
+O comando 'blkid' trás o UUID de todas as partições
+
+O comando 'lsblk' trás as informações dos dispositivos e as partições
+	-f inclui o UUID e LABEL
+	
+O comando 'e2label <particao>' mostra o label da partição
+
+O comando 'findfs <UUID / LABEL>' mostra a partição relacionada a esse	
+	UUID ou LABEL
+
+O comando 'findmnt' lista os pontos de montagem do sistema
+
+O comando 'sync' sicroniza o que está em cache e grava no disco
+
+
+046. 203.1 Operando o Sistema de Arquivos Linux========================
+==Swap=================================================================
+
+Podemos associar partições ou arquivos para ser usado como área de swap
+
+'mkswap <particao>' formata a partição com o tipo swap
+
+'swapon <particao>' inclui na área de swap
+
+Configuramos também a partição swap no fstab
+/dev/sdb2	swap	swap	defaults	0 	0
+
+Podemos usar um arquivo para swap:
+Usamos o comando 'dd if=/dev/zero of=/arquivoswap bs=1024k count=1000'
+
+Formatamos com o 'mkswap' e modificamos a permissão para 'chmod 600'
+E incluimos o arquivo usando o 'swapon'
+Configuramos também no fstab
+
+Ao usar um arquivo, podemos redmensiona-lo posteriormente
+
+
+047. 203.1 Operando o Sistema de Arquivos Linux========================
+==Systemd mount========================================================
+
+Criamos uma Unit do tipo mount no diretório '/etc/systemd/system. ex:
+	opt-montagem.mount
+	No arquivo:
+		[Unit]
+		Description=Ponto de Montagem Teste
+		
+		[Mount]
+		What=/dev/sdb1
+		Where=/opt/montagem
+		Type=ext4
+		Options=defaults
+		
+		[Install]
+		WantedBy=multi-user.target
+		
+	Rodamos o comando 'systemctl daemon reload'
+	Depois rodamos 'systemctl start opt-montagem.mount'
+	
+	
+049. 203.2 Manutenção de um Sistema de Arquivos Linux==================
+==Comandos=============================================================
+
+O comando 'mkfs' permite formatar uma partição
+	-t <tipo de particionamento> ou mkfs.<tipo de particionamento>
+	-c checa deadblocks antes de formatar
+	
+	
+O comando 'mke2fs' é para o tipo ext'sdb1
+
+O file system define as regras e os padrões que os dados vão ser gra_
+	dos em disco
+	
+
+O comando 'dump2fs' exibe informações sobre um filesystem
+	-h mostra as informações de uma partição
+	-f tras informações dos grupos de blocos 
+	-b mostra os badblocks
+	
+O comando 'tune2fs' permite customizar o filesystem
+	-l lista as configurações 
+	-L para definir um LABEL
+	-c define o numero de montagens antes de fazer um checagem
+	-m<valor> altera a porcentagem de fundo de reserva de blocos
+	
+O comando 'debugfs' consegue fazer alterações de baixo nivel em uma
+	partição e para recuperar arquivos quando a partição é do tipo 
+	ext2 (pouco usado)
+
+O comando 'badblocks' permite checar os badblocks das partições
+

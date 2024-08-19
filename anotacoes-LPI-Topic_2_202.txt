@@ -112,3 +112,41 @@ Os bootloaders ficam em '/boot/efi/EFI/ubuntu'
 
 037. 202.2 Recuperação do Sistema======================================
 ==Recuperação na prática===============================================
+
+038. 202.2 Recuperação do Sistema======================================
+==NVME=================================================================
+
+Non-Voletile Memory Express
+
+No Linux eles são mapeados como /dev/nvme*
+
+
+040. 202.3 Recuperação do Sistema======================================
+==Bootloaders Alternativos - Conceitos=================================
+
+SysLinux - Bootloader Linux criado para trabalhar com filesystem do 
+	tipo FAT (MS-DOS). Usado para pendrives de recuperação
+	
+EXTLINUX - Criado para sistemas de arquivos nativos do Linux como
+	(ext*, brtfs e xfs)
+	
+ISOLINUX - É um carregador de boot para CD-ROOMs usado para liveCDS
+
+PXELINUX - Pre-Boot Execution Envirionment usado para boot via 
+	interface de rede
+	
+UEFI Secure Boot - O boot seguro faz com que o UEFI só carregue 
+	imagens digitalmente assinadas. O Linux carrega o bootloader
+	shim.efi para lidar com os certificados e chaves, e então 
+	encaminha o fluxo para o grubx64.efi (padrão)
+	
+Systemd-boot - Criado para funcionar com UEFI, gerenciado pelo
+	comando 'bootctl'
+	
+
+U-Boot - The Universal Boot Loader, utilizado em sistemas Linux
+	embarcados, suportando multiplas arquiteturas
+	
+	
+041. 202.3 Recuperação do Sistema======================================
+==Bootloaders Alternativos - Prática===================================

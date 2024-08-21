@@ -24,7 +24,7 @@ Podemos atualizar os processos a serem executados ou mortos pelo
 	runlevel utilizando o comando 
 	'update-rc.d <processo> (en)(di)sable <runlevel>'
 	podemos restaurar o default usando o comando 
-	'update-rc.d <processo> 
+	'update-rc.d <processo>'
 	
 O comando 'runlevel' exibe o runlevel que estamos atualmente
 
@@ -67,6 +67,13 @@ As definições ficam em: '/etc/grub.d/'
 
 Na inicialização do sistema é apresentado o GRUB e podemos editar
 	as opções digitando 'E'
+Pomos entrar no modo single, mono usuário editando onde encontra-se
+	a informação referente ao kernel em:
+	'echo	'loading Linux 4.16.9...'
+	'linux	/vmlinuz-4.16.9 root=UUID=34545-454a ro quiet'
+	Inserimos após "ro quiet" o valor 1 ou s ou single
+	Depois damos CRTL + X
+
 	
 Podemos iniciar o /bin/bash e com isso rodar um fsck na partição /
 	Para torna-la novamente read and write rodamos o comando

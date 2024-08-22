@@ -137,3 +137,61 @@ O comando 'debugfs' consegue fazer alterações de baixo nivel em uma
 
 O comando 'badblocks' permite checar os badblocks das partições
 
+050. 203.2 Manutenção de um Sistema de Arquivos Linux==================
+==fsck=================================================================
+
+O comando 'fsck' é usado para checar e reparar o file system linux
+	somnente é possivel usar em partições desmontadas
+	-f force
+	-y yes para todas as perguntas
+	-n no para todas as perguntas
+	-c checa por badblocks e por estrutura de arquivos
+	-p corrige sem perguntar
+
+Podemos especificar apenas a partição
+	ex: 'fsck /dev/sdb3'
+
+Especificar o tipo de file system
+	ex: 'fsck -t ext3 /dev/sdb3'
+	
+Usar o fsck especifico do file system
+	ex: 'fsck.ext3 /dev/sdb3'
+	
+
+051. 203.2 Manutenção de um Sistema de Arquivos Linux==================
+==btrfs================================================================
+
+BTRFS - B-tree file system
+
+Filesystem Moderno
+Foco em tolerância a falhas e facilidade de administração e reparo
+Desenvolvido por um grupo de empresas Oracle, RedHat, Fujitsu, Intel,
+	SUSE, Facebook.
+	
+Recuros:
+	Suporte a RAID 0,1 e 10 (5 e 6 em desenvolvimento)
+	SubVolumes
+	Snapshots
+	Compressão direto do FS (zlib, LZO)
+	Conversão de ext3/4 para btrfs
+	
+Podemos verificar se o sistema suporta o btrfs usando o comando
+	'cat /proc/filesystems'
+	
+Para habilitar usamos
+	'modeprobe btrfs'
+	
+Para instalar o btrfs 'btrfs-tools'
+
+O comando 'btrfs filesystem show' exibe as partições que usam btrfs
+
+Os subvolumes podem ser criados usando  o comando
+	'btrfs subvolume create <caminho>'
+
+Visualizamos os subvolumes com o comando
+	'btrfs subvolume list /mnt/btrfs1/'
+	
+Podemos montar um subvolume dentro de um diretório
+	ex: 'mount -o subvol=Sub1 /dev/sdb5 /mnt/SubVolume1/
+	
+11:00

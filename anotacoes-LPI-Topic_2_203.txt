@@ -192,6 +192,187 @@ Visualizamos os subvolumes com o comando
 	'btrfs subvolume list /mnt/btrfs1/'
 	
 Podemos montar um subvolume dentro de um diretório
-	ex: 'mount -o subvol=Sub1 /dev/sdb5 /mnt/SubVolume1/
+	ex: 'mount -o subvol=Sub1 /dev/sdb5 /mnt/SubVolume1/'
+	Estamos montando o Subvloume "Sub" dentro do volume /dev/sdb5 no 
+		diretório /mnt/SubVolume1/
+	Com isso podemos fazer montagens expecificas de volumes para
+		cada diretório.
+		
+Criando um snapshot:
+	'btrfs subvolume snapshot /mnt/SubVolume1/ /mnt/SubVolume1/Snap1'
 	
-11:00
+Criando RAID no BTRFS
+	'mkfs.btrfs -d raid1 /dev/sdb5 /dev/sdb6'
+	ao montar o sdb5 o sdb6 será também montado
+	
+	
+Convertendo um outro filesystem para BTRFS
+	'btrfs-convert /dev/sdb3'
+	
+	
+052. 203.2 Manutenção de um Sistema de Arquivos Linux==================
+==xfs e zfs============================================================
+
+ZFS - Criado pela SUN para o Solaris, hoje mantido pela Oracle.
+Existe o OpenZFS que é uma alternativa de código aberto.
+Foca na integridade dos Dados, na facilidade de Gerenciamento.
+Sistema de Arquivos em Pools / Escalabilidade, RAID.
+
+
+XFS - Desenvolvido pela Silicon Graphics para IRIX
+Robusto e escalável
+Trabalha bem com arquivos grandes
+Redimensionamento/Desfragmentação Online
+Tamanho de Blocos Variáveis
+Temos que insala-lo: xfsprogs xfsdump
+
+O comando 'xfs_info' mostra os detalhes das particções xfs
+
+O comando 'xfs_repair' verifica e repara as partições xfs
+
+O comando 'xfsdump' usado para criar um backup incremental
+O comando 'xfsrestore' restaura um backup
+
+
+053. 203.2 Manutenção de um Sistema de Arquivos Linux==================
+==smart================================================================
+
+O smart é um daemon que roda no sistema para verificar o disco e 
+	a saude do disco e exibir relatórios informativos sobre.
+	
+O smartd é o daemon
+O smartctl é o cliente
+
+Instalamos o pacote 'smartmontools'
+
+O comando 'smartctl -i <disco>' trás informações sobre o disco
+	-a trás uma longa lista de detalhes
+	-H faz o teste de saúde
+	
+055. 203.3 Criando e Config. Opções dos Sistemas de Arquivos===========
+==Montagem Automatica==================================================
+
+O Auto FS permite montar automaticamente um diretório. Necessário fazer
+	a instalação do pacote autofs.
+	
+O processo automount pertence ao Autofs
+O arquivo de configuração fica em /etc/auto.master 
+	(chamado de master map)
+	
+No arquivo de configuração colocamos qual o diretório será monitorado, 
+	e depois qual arquivo que terá os detalhes dessa montagem, e, 
+	depois as opções
+	Ex: /mnt/autofs		/etc/auto.paulo		--timeout 15
+
+No arquivo com os detalhes colocamos o nome diretorio que será montado 
+	automaticamente. Depois as opções (as mesmas do mount). Em seguida
+	qual a partição será montada.
+	Ex: paulo -fstype=nfs	:/dev/sdb1
+		paulo -fstype=nfs	10.0.0.55:/dev/sdb1
+		
+Necessário criar o diretorio autofs dentro de /mnt/autofs
+
+########
+Auto mount usando o Systemd
+
+Precisamos criar duas unidades, uma de mount e outra de automount
+No diretório /etc/systemd/system, criamos:
+	'vim mnt-automount.mount'
+	
+	[Unit]
+	Description=Teste de Montagem Automatica
+	
+	[Mount]
+	What=/dev/sdb2
+	Where=/mnt/automount
+	
+	[Install]
+	WantedBy=multi-user.target
+	
+	
+	'vim mnt-automount.automount'
+	
+	[Unit]
+	Description=Auto Montagem
+	
+	[Mount]
+	Where=/mnt/automount
+	
+	[Install]
+	WantedBy=multi-user.target
+
+	
+	Reiniciamos o deemon 'systemctl daemon-reload'
+	
+
+056. 203.3 Criando e Config. Opções dos Sistemas de Arquivos===========
+==Imagem para CD DVD===================================================
+
+Devemos instalar os pacotes 'wodim', 'genisoimage' e 'udftools'
+
+Para criar um arquivo de imagem baseado no CDROM fazemos:
+	'dd if=/dev/sr0 of=imagem-cd.iso'
+	
+Para gravar o CD fazemos:
+	'cdrecord dev=/dev/sr0 imagem-cd.iso'
+	
+Como criar uma imagem de CD baseado em arquivos do computador:
+	'mkisofs -o imagem.iso /home/paulo'
+	
+Para a incluir mais de um diretório usamos a opção -graft-points
+	'mkisofs -o imagem3.iso -graft-points dir1=/home/paulo 
+		dir2=/etc/yum.repos.d/'
+		
+Ao usarmos o 'mkisofs' nos deparamos com as limitações da ISO9660
+	em que os arquivos usam o padrão de nome 8.3 e não é copiado 
+	os links simbolicos e as permisões dos arquivos.
+	Existem diversas extensões para o ISO9660, uma delas é joliet
+	que permite usar nomes longos e com acentos. -J
+	Outra extesão é o Rock Ridge permite usar nomes longos, manter
+	as permissões e usar links simbolicos. -R
+	Existe a extensão El Torito usada para criar CD bootável
+	A opção -hfs cria CDs que podem ser lidos pelo windows e pelo 
+	MAC OS.
+	Exite o padrão -udf, um novo formato para CD e DVDs
+
+
+057. 203.3 Criando e Config. Opções dos Sistemas de Arquivos===========
+==Criptografia=========================================================
+
+Usamos o pacote 'cryptsetup'
+
+Para criptograr é necessário que a partição esteja vazia, caso já haja
+	dados eles serão perdidos.
+	
+Para criar uma partição criptografada fazemos:
+	'cryptsetup -v --verify-passphrase luksFormat <partição>'
+	
+Podemos verificar se partição foi criptografada usando o comando 
+	'lsblk -f' a partição aparecerá com o tipo crypto_LUKS
+	
+Temos que ativar a partição criptografada com:
+	'cryptosetup luksOpen'
+	'cryptosetup open --type luks <particao> <novo nome da particao>'
+	
+Após temos que formatar a partição
+	'dkfs.ext4  /dev/mapper/part-segura'
+	
+Podemos consultar o status com o comando:
+	'cryptsetup status part-segura'
+	
+Depois montamos a partição.
+
+Fechamos a partição com: 'crypsetup close part-segura'
+
+######
+Para montar automaticamente temos que:
+
+Configuramos no arquivo '/etc/crypttab'
+Ex: <nome da particao>	<device>  <aquivo com a senha> <tipo de crypto>
+	part-segura			/dev/sdb2  none					luks
+	
+Configuramos também no fstab
+
+Se utilizado um arquivo com as senhas devemos usar o comando
+	'cryptsetup luksAddKey /dev/sdb2 /senha'
+	

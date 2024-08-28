@@ -1,0 +1,102 @@
+TÓPICO 204: Dispositivos de armazenamento==============================
+=======================================================================
+061. 204.1 Configurando RAID===========================================
+==O que é RAID e Principais Tipos======================================
+
+RAID - Redundant Array of Inexpensive Drives ( Independent Diskss)
+Metodo para agrupar vários dispositovs em uma única unidade lógica
+
+RAID 0 (Stripping) - Combina dois ou mais discos
+
+RAID 1 (Mirroring) - Espelhamento dos drivers
+
+RAID 5 - Funciona com três ou mais discos e cada disco contém uma 
+	paridade de blocos dos outros discos
+	
+	
+062. 204.1 Configurando RAID===========================================
+==mdadm e procmdstat===================================================
+
+Para configurar o RAID precisamos de dois pacotes: mdadm e procmdstat
+
+Temos que formatar as partições com o tipo 'Linux raid auto'
+	código 'fd' no fdisk
+	
+Criamos um dispositivo multi device 'md0'
+Usando o comando 'mdadm':
+	'mdadm -v --create /dev/md0 -l0 -n2 /dev/sdc1 /dev/sdd1'
+		l - level
+	
+Formatamos então o md0 usando o mkfs
+
+Podemos listar os detalhes usando o comando 'mdadm --detail /dev/md0'
+	ou '/proc/mdstat'
+	
+Depois podemos montar o dispositivo de raid que criamos
+
+Existe um arquivo de configuração onde listamso os dispositivos 
+	RAID criados '/etc/mdadm/mdadm.conf'
+	Jogamos a saida do comando 'mdadm -v --detail --scan' para o 
+	arquivo de configuração:
+	'mdadm -v --detail --scan >> /etc/mdadm/mdadm.conf'
+	
+Podemos simular uma falha usando o comando:
+	'mdadm --manage --fail /dev/md1 /dev/sdd2'
+	
+Podemos remover um device do raid da seguinte forma:
+	'mdadm /dev/md1 -r /dev/sdd2'
+	Adicionando usando a opção -a 
+	'mdadm /dev/md1 -a /dev/sdd2'
+	
+Paramos e iniciamos um dispositivo RAID
+	Parar: 'mdadm --stop /dev/md0'
+	Iniciar: 'mdadm --assemble --run /dev/md0'
+	
+A opção examine permite examinar um dispositivo 
+	'mdadm --examine /dev/sdc2'
+	
+
+Para excluir um RAID em definitivos temos que remover os md e 
+	zerar os superblocks de todos os dispositivos 
+	'mdadm --remove /dev/md1'
+	'mdadm --remove /dev/md0'
+	'mdadm --zero-superblock /dev/sdcX'
+	
+
+064. 204.2 Ajustando o Acesso aos Dispositivos de Armazenamento========
+==Tipos de Devices=====================================================
+
+IDE - Integrate Drive Eletronics - Mapeado como /dev/hd*
+ATA - Advanced Tecnology Attachment - Mapeado com /dev/sd*
+SCSI - Small Computer System Interface
+	2 tipos:
+		8 bits: 7 dispositivos + controladora
+		16 bits: 15 dispositivos + controladora
+	Mapeado como /dev/sd*
+
+
+065. 204.2 Ajustando o Acesso aos Dispositivos de Armazenamento========
+==hdparm sdparm========================================================
+
+O comando 'hdparm' é usado para obter e definir parametros dos devices
+	-i identificação do dispositivo
+	-t faz um teste de leitura do disco
+	-T teste de leitura de cache
+	-d para usar o DMA
+	
+O comando 'sdparm' é especifico para SCSI e SATA
+	
+
+066. 204.2 Ajustando o Acesso aos Dispositivos de Armazenamento========
+==fstrim tune2fs=======================================================
+
+O 'fstrim' serve para reduzir os problemas de performance dos discos 
+	SSD ocasionados pela fragmentação do disco descartando alguns
+	blocos com defeitos.
+
+O 'tune2fs' ajusta os paramentros de particoes ext*
+	-e altera o comportamento do kernel caso encontre um erro no disco
+	-s sparce-super-flag melhora o uso dos blocos em filesystem grandes
+	-O define as opções de montagem do disco
+	
+	

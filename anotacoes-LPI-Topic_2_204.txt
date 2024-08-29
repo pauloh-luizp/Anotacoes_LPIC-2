@@ -99,4 +99,116 @@ O 'tune2fs' ajusta os paramentros de particoes ext*
 	-s sparce-super-flag melhora o uso dos blocos em filesystem grandes
 	-O define as opções de montagem do disco
 	
+067. 204.2 Ajustando o Acesso aos Dispositivos de Armazenamento========
+==NAS SAN==============================================================
+
+NAS - Network-Attached Storage
+
+SAN - Storage Area Network
+	Protocolos SAN
+	FCP - Fiber Channel Protocol - Mapeamento do protocolo SCSI sobre
+		Fibra Optica
+	AoE - ATA over Ethernet
+	FCoE - Fiber Channel over Ethernet
+	iSCSI - Mpaeamento do SCSI sobre o Protocolo IP
+	
+No SAN temos dois tipos de identificadores:
+	WWID - World Wide Identifier
+	WWN - World Wide Name
+	Esses identificadores equivalem ao MAC em uma rede Ethernet
+	
+O comando 'ls -l /dev/disk/by-id' e '/lib/udev/scsi_id -g /dev/sda'
+	exibem os identificadores dos discos e da controladora SCSI
+
+Com o 'cat /proc/scsi/scsi' listamos as controladoras SCSI
+
+
+068. 204.2 Ajustando o Acesso aos Dispositivos de Armazenamento========
+==iSCSI================================================================
+
+Os servidores são o "Targets", os clientes são os "Initiators"
+
+Usamos os pacotes 'tgt' e 'open-iscsi'
+
+Para configurar usamos o arquivo '/etc/tgt/targets.conf'
+	No arquivo colocamos uma tag parecidad com HTML aberta contendo:
+	<target iqn.ano-mes.dominio.ao.contrario:nome_do_alvo>
+		backing-store /dev/sdd1
+		backing-store /dev/sdb6
+	</target>
+
+Reiniciamos o tgt 'systemctl restart tgt'
+Verificamos o status com 'tgt-admin --show'
+
+Verificando os alvos 'iscsiadm -m discovery -t sendtargets -p 10.0.0.1'
+
+Para nos conectar:
+	'iscsadm -m node -p 10.0.0.1 
+	--target=iqn.ano-mes.dominio.ao.contrario:nome_do_alvo --login'
+	
+Verificamos o mapeamento:
+	'isciadm -m session -P3'
+	
+Para nos desconectar:
+	'iscadm -m node -u'
+	
+Podemos ver alguns detalhes em '/var/lib/iscsi'
+
+O processo 'iscsid' é o daemon do iscsi
+
+
+071. 204.3 Logical Volume Manager======================================
+==LVM Parte 1==========================================================
+
+LVM - Logical Volume Manager 
+
+Criamos um Physical Volumes (PVs) e criamos um Volume Group (VG)
+
+Temos os Logical Volumes e depois o File Systems
+
+
+Temos que instalar o pacote 'lvm2'
+O arquivo de configuração fica em /etc/lvm/lvm.conf
+
+Temos que alterar o tipo da partição para 8e Linux LVM
+
+Usamos o comando 'pvcreate' para criar um volume fisico
+	'pvcreate /dev/sdd1'
+	
+O comando 'pvs' ou 'pvdisplay' mostra os detalhes dos volumes fisicos
+
+Criamos o Volume group com o comando 'vgcreate'
+	'vgcreate -grupo1 /dev/sdc1 /dev/sdc2'
+	a opção -s é a opção de physical extend
+	
+O comando 'vgs' ou 'vgdisplay' mostra os detalhes do volume group
+
+Temos que ativar o volume group
+
+Ativamos:  'vgchange -a y grupo1'
+
+Depois criamos o volume lógico usando o comando 'lvcreate'
+	'lvcreate -l<quantidade de physical extend>'
+	'lvcreate -L<tamanho em Gigas> <nome do grupo> -n <nome do vl>'
+	
+O comando 'lvs' ou 'lvdisplay' mostra os detalhes do logical volume
+
+
+072. 204.3 Logical Volume Manager======================================
+==LVM Parte 1==========================================================
+
+Redimensionando o tamanho de um volume lógico usando o comando
+	'lvextend -L5G <dispositivo>'
+	
+Apos isso temos que fazer um resize do file system da partição
+	'resize2fs /dev/grupo1/lv_teste1'	
+
+
+Quando vamos reduzir temos que redimensionar primeiro o file system
+	'resize2fs /dev/grupo1/lv_teste1 12G'
+	
+Redimensionamos o tamanho do volume lógico usando o comando
+	'lvreduce -L13G /dev/grupo1/lv_teste1'
+	
+09:00
 	

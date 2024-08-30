@@ -195,10 +195,11 @@ O comando 'lvs' ou 'lvdisplay' mostra os detalhes do logical volume
 
 
 072. 204.3 Logical Volume Manager======================================
-==LVM Parte 1==========================================================
+==LVM Parte 2==========================================================
 
 Redimensionando o tamanho de um volume lógico usando o comando
-	'lvextend -L5G <dispositivo>'
+	'lvextend -L+5G <dispositivo>' para adicionar 5GB
+	'lvextend -L15G <dispositivo>' para totalizar 15GB
 	
 Apos isso temos que fazer um resize do file system da partição
 	'resize2fs /dev/grupo1/lv_teste1'	
@@ -210,5 +211,16 @@ Quando vamos reduzir temos que redimensionar primeiro o file system
 Redimensionamos o tamanho do volume lógico usando o comando
 	'lvreduce -L13G /dev/grupo1/lv_teste1'
 	
-09:00
+Removendo um Physical Volume 
+	'vgreduce grupo1 /dev/sdd2'
 	
+Removendo um Logical Volume
+	'lvremove lv_teste'
+
+Renomeando o Volume Group
+	'vgrename grupo1 grupo2'
+
+Criando snapshots (necessário 10-20% do tamanho total)
+	'lvcreate -L1G -s -n teste-snapshot /dev/grupo2/aula' 
+A saida do comando 'lvs' também exibe os snapshots e é possivel
+	montar os snapshots

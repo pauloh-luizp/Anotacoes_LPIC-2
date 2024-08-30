@@ -1,0 +1,114 @@
+TÓPICO 205: Configuração de Rede=======================================
+=======================================================================
+076. 204.1 Configuração de Rede========================================
+==ifconfig e route=====================================================
+
+O comando 'ifconfig' mostra as interfaces ativas do sistema e os 
+	detalhes sobre elas
+	-a mostra todas as interface inclusive as inativas
+	
+Derrubando e ativando uma interface
+	'ifconfig enp0s3 down/up'
+	
+Definindo um IP para a interface (se não colocarmos uma mascara, será
+	atribuido a mascara padrão da classe do endereço ip atribuido)
+	'ifconfig enp0s3 10.0.0.50 netmask 255.255.255.0'
+	
+Podemos ter mais de IP atribuido a uma interface, ao atribuir um outro
+	ip será criado uma subinterface
+	'ifconfig enp0s3 add 150.150.150.150'
+	Se desabilitarmos a interface e ativarmos ela novamente a configura
+	ção do IP será perdida
+	
+Podemos alterar o endereço MAC da placa
+	'ifconfig enp0s3 hw ether 08:08:08:08:08:08:08'
+	
+
+O comando 'route' mostra as rotas ativas no sistema
+	-n não traduz os IPs
+	
+Para adiconar ou remover uma rota
+	'route add -net 192.168.10.0 netmask 255.255.255.0 
+		gw 192.168.1.55 enp0s3'
+		
+Removendo a rota padrão	'route del default'
+	'route add default gw 192.168.1.1'
+
+Removendo uma rota 'route del -net 10.1.0.0/24'
+
+
+077. 204.1 Configuração de Rede========================================
+==ip===================================================================
+
+O comando 'ip' veio para subistiuir o 'ifconfig e o route'
+
+Para exibir alguns dos detalhes da interface usamos
+	'ip link show'
+	
+Para exibir o IP das interfaces:
+	'ip address show'
+	
+Para atribuir um IP:
+	'ip address add 10.0.0.50/24 dev enp0s3'
+
+Para exibir as rotas
+	'ip route show'
+	
+Adicionando uma rota
+	'ip route add 172.16.30.0/24 via 192.168.1.80 dev enp0s8'
+
+Removendo e adicionando a rota default
+	'ip route del default'
+	'ip route add default via 192.168.1.1'
+	
+
+078. 204.1 Configuração de Rede========================================
+==arp==================================================================
+
+ARP - Address Resolution Protocol
+RARP - Revese  Address Resolution Protocol
+
+O comando 'arp' exibe o relacionamento de endereço ip para MAC Address
+
+Podemos adicionar e remover entradas na tabela
+	'arp -d 192.168.1.220' remover	
+	'arp -s 192.168.1.222 b3:b3:b3:00:00:00' adicionar
+	'arp -f <nome do arquivo>' adiciona as entradas do arquivo,
+	caso não informado o arquivo, ele pegará do arquivo /etc/ethers
+
+
+O comando 'arpwatch' requer o pacote 'arpwatch' serve para monitorar
+	e alarmar as mudanças da tabela ARP
+	O arquivo de configuração fica em /etc/default/arpwatch
+	
+'arpwatch -d' exibe as mudanças em tempo real, no modo debug
+
+	
+079. 204.1 Configuração de Rede========================================
+==Redes sem fio========================================================
+
+Para configuração de rede sem fio é ideal parar o network manager
+	'systemctl stop NetworkManager'
+	
+Usamos o comando iw para gerenciar as interface wireless com várias
+	limitações de uso
+	'iw dev wlp2s0 link'
+	'iw dev wlp2s0 scan' para buscar redes
+	
+O comando 'iwlist' lista as redes disponíveis
+	'iwlist wlp2s0 scanning'
+	
+O comando 'iwconfig' é para configurar a interface wireless
+	Ex:
+	'iwconfig wlp2s0 essid TP-LINK' Rede wi-fi 
+	'iwconfig wlp2s0 key s:121215' senha da rede wi-fi
+	'iwconfig wlp2s0 ap <endereço MAC>'
+	Podemos rodar um 'dhclient wlp2s0' para buscar um IP via DHCP
+	
+	Conectando com autenticação WPA
+	'wpa_passphase <SSID> <senha>'
+	Pegamos a saida e jogamos em um arquivo e usamos esse arquivo 
+		para nos conectar
+	'wpa_supplicant -c <arquivo> -B -d -i wlp2s0'
+	
+	

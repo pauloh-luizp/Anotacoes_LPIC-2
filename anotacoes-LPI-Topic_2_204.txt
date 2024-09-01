@@ -17,7 +17,7 @@ RAID 5 - Funciona com três ou mais discos e cada disco contém uma
 062. 204.1 Configurando RAID===========================================
 ==mdadm e procmdstat===================================================
 
-Para configurar o RAID precisamos de dois pacotes: mdadm e procmdstat
+Para configurar o RAID precisamos do pacote 'mdadm'
 
 Temos que formatar as partições com o tipo 'Linux raid auto'
 	código 'fd' no fdisk

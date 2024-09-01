@@ -355,7 +355,7 @@ Temos que ativar a partição criptografada com:
 	'cryptsetup open --type luks <particao> <novo nome da particao>'
 	
 Após temos que formatar a partição
-	'mkfs.ext4  /dev/mapper/part-segura'
+	'mkfs.ext4  /dev/mapper/<novo nome da partição'
 	
 Podemos consultar o status com o comando:
 	'cryptsetup status part-segura'

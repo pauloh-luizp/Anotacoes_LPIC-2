@@ -295,7 +295,7 @@ No diretório /etc/systemd/system, criamos:
 	[Unit]
 	Description=Auto Montagem
 	
-	[Mount]
+	[Automount]
 	Where=/mnt/automount
 	
 	[Install]

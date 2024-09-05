@@ -111,4 +111,230 @@ O comando 'iwconfig' é para configurar a interface wireless
 		para nos conectar
 	'wpa_supplicant -c <arquivo> -B -d -i wlp2s0'
 	
+081. 204.2 Configuração Avançadas de Rede==============================
+==Roteamento===========================================================
+
+Para alcançar algumas redes é necessário criar um rota.
+
+Adicionando uma rota
+	'route add -net 172.16.32.0/24 gw 192.168.1.210'
+	Flags:
+		U - Up
+		H - O destino é um host
+		G - Usado como regra Gateway
+		R - Rota restabelecida dinamicamente
+		D - Rota instalada dinamicamente
+		M - Modificada dinamicamente
+		A - Instalado pelo 'addrconf'
+		C - Cache
+		! - Rota rejeitada
+		
 	
+Habilitando o encaminhamento de pacotes forward
+	'echo 1 > /proc/sys/net/ipv4/ip_forward'
+	'echo 1 > /proc/sys/net/ipv6/conf/all/forwarding'
+	ou com 
+	'sysctl -w net.ipv4.ip_forward=1'
+	
+O comando 'traceroute' imprime a rota dos pacotes até o destino
+	'traceroute 172.32.16.220'
+	Usa pacotes UDP por padrão
+	-I força o uso de pacotes ICMP
+	
+
+082. 204.2 Configuração Avançadas de Rede==============================
+==netcat===============================================================
+
+O comando 'netcat' ou 'nc' serve para testar uma conexão atraves de 
+	um IP ou uma porta.
+	'netcat 192.168.1.210 80'
+	
+Testando varias portas sem se conectar a elas
+	'nc -vz 192.168.1.210 50-100'
+	-v verbose
+	-z testa a porta, mas não conecta a ela
+	
+Podemos usar para abrir uma porta
+	'nc -l -p 1234'
+	-l listem
+	-p port
+	
+O comando 'netstat' mosta as informações sobre as conexões de rede,
+	tabela de roteamento, estatísticas das interfaces
+	-t tcp
+	-u udp
+	-l conexões em estado listem
+	-n não traduz os nomes e o IP
+	-r mostra a tabela de roteamento
+	-i mostra as estatisicas por interface
+	-a mostra todos os sockets ativos
+	-p mostra qual processo que abriu tal porta/conexão
+	-c fica continuamente atualizando as conexões
+	
+O comando 'ss' é semelhante ao 'netstat' as opções também são parecidas
+
+O comando 'lsof' mostra quais arquivos estão abertos
+	-i mostra todas as conexões de rede
+	podemos filtrar por tipo de protocolo e porta
+	'lsof -i tcp'
+	'lsof -i udp'
+	'lsof -i :22'
+	'lsof -i @192.168.1.210:22'
+	
+O comando 'ip neigh show' mostra os vizinhos e qual interface que 
+	ele está conectado
+
+	
+083. 204.2 Configuração Avançadas de Rede==============================
+==tcpdump==============================================================
+
+O comando 'tcpdump' verifica tudo que esta trafegando na rede, servindo
+	para analisar o trafego de rede das interfaces
+	-n para não traduzir os nomes
+	podemos filtrar por protocolo
+	-i para especificar a interface
+	-q para modo sucinto
+	-w para direcionar a saida para um arquivo
+	-r para ler um arquivo pcap
+	src para filtrar por origem
+	dst para filtrar por destino
+	host para um host especifico
+	net para uma rede especifica
+	portrange para especificar um range de portas
+	Podemos usar argumentos lógicos 'not' '!' 'and' 'or'
+	-v verbose
+	-v verbose com mais informações
+	-vvv verbose com o maior numero de informações possiveis
+	
+	Ex: 
+	'tcpdump -n icmp -c10 -i enp0s8'
+	
+
+O comando 'nmap' serve para scanear as portas da rede
+	'nmap <ip/mascara>'
+	-F fast scanner
+	-O tenta identificar o sistema operacional
+	-sV pega a versão da aplicação que está sendo executada 
+		na porta
+	-p para especificar a porta
+
+
+085. 204.3 Resolução de problemas de rede==============================
+==Interfaces, Redes e Conexão==========================================
+
+Olhar se as interces estão ativas.
+Olhar o netmask se a rede está correta.
+Verificar as infomações de pacotes transmitidos e recebidos.
+
+Na saida do ifconfig temos os 
+	Erros: patocotes que tiveram erros na formação
+	Dropped: falhas na transmissão do pacote
+	Overruns: pacotes descatados por motivo de sobrecarga
+	Frame: pacotes mal formatados
+	Carrier: problemas no link fisico
+	Collisions: colisões de pacotes
+	
+Importante verificar as rotas, pricipalmente a rota padrão
+
+Usamos o ping e ping6
+
+O comando 'mtr' my trace route é um traceroute 'ao vivo'
+	exibindo as estaticas em tempo real
+
+
+086. 204.3 Resolução de problemas de rede==============================
+==Configurações========================================================
+
+Antes de começarmos a configuração devemos parar o network manager
+	'systemctl stop NetwokManager'
+	
+As configurações de rede ficam em 
+	'/etc/network/interfaces' #debian base
+	'/etc/sysconfig/network-scripts/ifcg-<interface>' CentOs
+	Ex:
+	#o auto especifica que a interface ficará ativa no inicio do S.O
+	auto lo enp0s3 enp0s8 
+	
+	iface enp0s3 inet static
+	address 172.10.10.10
+	netmask 255.255.255.192
+	gateway 172.10.10.1
+	dns-nameserver 8.8.8.8
+	
+	iface enp0s8 inet dhcp
+	
+Reiniciamos o serviço de rede
+	'systemctl restart networking'
+	
+Para os sistemas CentOs a configuração de Gateway e DNS ficam em:
+	'/etc/sysconfig/network' #gateway
+	'/etc/resolv.conf' #DNS
+	
+As configurações do NetworkManager ficam em
+	'/etc/NetworkManager/'
+	
+O comando 'nmcli' exibe as conexões ativas no momento
+
+
+087. 204.3 Resolução de problemas de rede==============================
+==DNS==================================================================
+
+O principal arquivo de configuração é o '/etc/resolv.conf'
+
+No arquivo '/etc/hosts' temos uma lista interna de endereços DNS
+
+O arquivo '/etc/networks' temos o registros DNS das nossas redes
+
+O nome da máquina fica em '/etc/hostname'
+
+No arquivo '/etc/nsswitch.conf' determinamos a ordem de prioridade
+	que as aplicações vão procurar os arquivos de configuração
+	
+	
+O comando 'hostname' mostra o nome da maquina
+	-d mostra o dominio
+	-f mostra o FQDN Fully Qualified Domanin Name
+	
+O comando 'host' serve para fazer um DNS Lookup. Usado para ver informado
+	ções especificas do DNS
+	Ex:
+	'host www.lpi.org'
+	'host -t mx lpi.org' #busca as informações do registro mx
+	-a exibe todas as informações do dominio
+	
+O comando 'dig' e 'nslookup' serve para um DNS Lookup
+	Podemos especificar um servidor DNS
+	'dig lpi.org @8.8.8.8'
+#O 'dig' é instalado pelo pacote 'dnsutils'
+
+
+088. 204.3 Resolução de problemas de rede==============================
+==Logs=================================================================
+
+Podemos usar o comando 'dmesg' que consulta um buffer do sistema com
+	informações desde o boot do sistema
+	
+Os arquivos de logs do Debian ficam em '/var/log/syslog'
+Os arquivos de logs do CentOs ficam em '/var/log/messages'
+
+Podemos ver os logs atráves do systemd journal pelo comando 
+	'jornalctl'
+	-u para especificar um tipo de servico
+	--since para filtra pelo horário, dia 
+	-k logs relacionado ao kernel
+	
+	
+089. 204.3 Resolução de problemas de rede==============================
+==hosts.allow  hosts.deny==============================================
+
+A configuração do TCP Wrapper pode impedir acesso a um serviço
+O arquivo de configuração ficam em '/etc/hosts.allow' '/etc/hosts.deny'
+Nesses arquivos temos os serviços liberados e quais são bloqueados
+O primeiro a ser lido é o hosts.allow
+Ex:
+	#tudo da rede 192.168.1.0 exceto o host 192.168.1.1
+	#ALL são todos os serviços
+	ALL: 192.168.1.* EXCEPT 192.168.1.1
+	
+No /etc/hosts.deny se colocarmos "ALL: ALL" todos os serviços não
+	listados no /etc/hosts.allow serão negados

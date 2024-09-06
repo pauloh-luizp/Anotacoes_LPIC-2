@@ -1,6 +1,6 @@
 TÓPICO 205: Configuração de Rede=======================================
 =======================================================================
-076. 204.1 Configuração de Rede========================================
+076. 205.1 Configuração de Rede========================================
 ==ifconfig e route=====================================================
 
 O comando 'ifconfig' mostra as interfaces ativas do sistema e os 
@@ -37,7 +37,7 @@ Removendo a rota padrão	'route del default'
 Removendo uma rota 'route del -net 10.1.0.0/24'
 
 
-077. 204.1 Configuração de Rede========================================
+077. 205.1 Configuração de Rede========================================
 ==ip===================================================================
 
 O comando 'ip' veio para subistiuir o 'ifconfig e o route'
@@ -62,7 +62,7 @@ Removendo e adicionando a rota default
 	'ip route add default via 192.168.1.1'
 	
 
-078. 204.1 Configuração de Rede========================================
+078. 205.1 Configuração de Rede========================================
 ==arp==================================================================
 
 ARP - Address Resolution Protocol
@@ -84,7 +84,7 @@ O comando 'arpwatch' requer o pacote 'arpwatch' serve para monitorar
 'arpwatch -d' exibe as mudanças em tempo real, no modo debug
 
 	
-079. 204.1 Configuração de Rede========================================
+079. 205.1 Configuração de Rede========================================
 ==Redes sem fio========================================================
 
 Para configuração de rede sem fio é ideal parar o network manager
@@ -111,7 +111,7 @@ O comando 'iwconfig' é para configurar a interface wireless
 		para nos conectar
 	'wpa_supplicant -c <arquivo> -B -d -i wlp2s0'
 	
-081. 204.2 Configuração Avançadas de Rede==============================
+081. 205.2 Configuração Avançadas de Rede==============================
 ==Roteamento===========================================================
 
 Para alcançar algumas redes é necessário criar um rota.
@@ -142,7 +142,7 @@ O comando 'traceroute' imprime a rota dos pacotes até o destino
 	-I força o uso de pacotes ICMP
 	
 
-082. 204.2 Configuração Avançadas de Rede==============================
+082. 205.2 Configuração Avançadas de Rede==============================
 ==netcat===============================================================
 
 O comando 'netcat' ou 'nc' serve para testar uma conexão atraves de 
@@ -185,7 +185,7 @@ O comando 'ip neigh show' mostra os vizinhos e qual interface que
 	ele está conectado
 
 	
-083. 204.2 Configuração Avançadas de Rede==============================
+083. 205.2 Configuração Avançadas de Rede==============================
 ==tcpdump==============================================================
 
 O comando 'tcpdump' verifica tudo que esta trafegando na rede, servindo
@@ -219,7 +219,7 @@ O comando 'nmap' serve para scanear as portas da rede
 	-p para especificar a porta
 
 
-085. 204.3 Resolução de problemas de rede==============================
+085. 205.3 Resolução de problemas de rede==============================
 ==Interfaces, Redes e Conexão==========================================
 
 Olhar se as interces estão ativas.
@@ -242,7 +242,7 @@ O comando 'mtr' my trace route é um traceroute 'ao vivo'
 	exibindo as estaticas em tempo real
 
 
-086. 204.3 Resolução de problemas de rede==============================
+086. 205.3 Resolução de problemas de rede==============================
 ==Configurações========================================================
 
 Antes de começarmos a configuração devemos parar o network manager
@@ -276,7 +276,7 @@ As configurações do NetworkManager ficam em
 O comando 'nmcli' exibe as conexões ativas no momento
 
 
-087. 204.3 Resolução de problemas de rede==============================
+087. 205.3 Resolução de problemas de rede==============================
 ==DNS==================================================================
 
 O principal arquivo de configuração é o '/etc/resolv.conf'
@@ -308,7 +308,7 @@ O comando 'dig' e 'nslookup' serve para um DNS Lookup
 #O 'dig' é instalado pelo pacote 'dnsutils'
 
 
-088. 204.3 Resolução de problemas de rede==============================
+088. 205.3 Resolução de problemas de rede==============================
 ==Logs=================================================================
 
 Podemos usar o comando 'dmesg' que consulta um buffer do sistema com
@@ -324,7 +324,7 @@ Podemos ver os logs atráves do systemd journal pelo comando
 	-k logs relacionado ao kernel
 	
 	
-089. 204.3 Resolução de problemas de rede==============================
+089. 205.3 Resolução de problemas de rede==============================
 ==hosts.allow  hosts.deny==============================================
 
 A configuração do TCP Wrapper pode impedir acesso a um serviço

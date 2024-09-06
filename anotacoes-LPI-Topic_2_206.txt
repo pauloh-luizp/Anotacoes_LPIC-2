@@ -1,0 +1,140 @@
+TÓPICO 206: Manutenção do sistema======================================
+=======================================================================
+093. 206.1 Compilar e Instalar Programas pelo Codigo Fonte=============
+==Compactação==========================================================
+
+Por padrão os softwares são instalados no '/usr/src'
+
+Descompactar arquivos tar
+	'tar zxvpf <pacote.tar.gz>' #descompacta tudo
+	'gunzip <pacote.tar.gz>' #descompacta o gz
+		depois usamos o 'tar xvpf <pacote.tar>'
+		
+Descompactando arquivos bz2
+	'bunzip2 <pacote.tar.bz2>'
+		depois usamos o 'tar jxvpf <pacote.tar>'
+		
+Descompactando arquivos xz
+	'tar Jxvpf <pacote.tar.xz>'
+	Podemos usar o 'unxz <pacote.tar.xz>'
+	
+
+094. 206.1 Compilar e Instalar Programas pelo Codigo Fonte=============
+==Compilar e Instalando================================================
+
+O arquivo Makefile.in é o arquivo base para configurar o sistema
+A maioria dos pacotes tem o scritp 'configure'
+Executamos com './configure'. Gera no final o arquivo 'Makefile'
+	Com a opção '--prefix=' podemos dizer qual local o software será
+	instalado
+Depois rodamos o 'make'
+Depois o 'make install' #para instalar no local que especificamos
+
+
+095. 206.1 Compilar e Instalar Programas pelo Codigo Fonte=============
+==Patch================================================================
+
+O comando 
+	'diff -u <arquivo original> <arquivo atualizado> > <nome do patch'
+	para gerar um patch
+	
+Usamos o comando 'patch' para aplicar um patch
+	'patch < arquivo-patch'
+	
+Para aplicar um patch em uma pasta diferente da que estamos atualmente
+	'patch -p< "/" que não iremos considerar> < arquivo-patch'
+	Ex:
+		-p3 para o caminho /usr/src/links/default
+		irá considerar apenas links/default
+		
+
+097. 206.2 Operações de Backup=========================================
+==Conceitos============================================================
+
+Diretórios para Backup
+	/home - Arquivo dos usuários
+	/etc - Configurações do S.O e Aplicações/Seviços
+	/var - log, db, lib, spool/mail, www
+	/usr e /opt - Softwares instalados
+	
+
+098. 206.2 Operações de Backup=========================================
+==Comandos básicos=====================================================
+
+tar - tape archiver
+
+Para excluir um diretório usamos a opção
+	--exclude=PATTERN
+	-c ou --create para criar um archiver
+	-x ou --extract para extrari um archiver
+	-t ou --list para testar um archiver
+	-g é como fazer um backup incremental usando o tar
+	
+Criando um backup
+	'tar -cvf <nome do arquivo> <diretorio a ser feito backup>'
+	Para fitas usamos:
+	'tar -cvf /dev/nst0 <diretorio a ser feito backup>' 
+	#nst0 não rebobina
+	'tar -cvf /dev/st0 <diretorio a ser feito backup>' 
+	#st0 rebobina a fita
+
+Para criar um backup incremental
+	'tar -cvf backup.tar -g <arquivo_de_controle.txt> /etc'
+	
+Os dispositivos de fita já tem compactação via Hardware
+
+Podemos usar o 'cpio'. Copiamos uma lista de arquivos para cpio
+	Ex:
+	'find /etc/*conf | cpio -vo > backup.cpio'
+	Para extrair
+	'cpio -ivdm
+		-i para extrair
+		-v para verbose
+		-d para criar os diretorios necessários
+		-m para manter o mesmo horários originais dos arquivos
+		
+		
+Podemos usar o 'dd' copiando Byte a Byte de uma partição inteira
+	'dd if=/dev/sda1 of=backup.img' #backup
+	'dd if=backup.img of=/dev/sda2' #restaurar
+	
+O comando 'mt' serve para gerenciar as fitas
+	'mt -f /dev/nst0 rewind' #para rebobinar
+	'mt -f /dev/nst0 offline' #rebobina e ejeta a fita
+	'mt -f /dev/nst0 status' #exibe o status do dispositivos
+	'mt -f /dev/nst0 eod' #vai para a parte da fita onde foi
+		feita a ultima gravação
+
+
+099. 206.2 Operações de Backup=========================================
+==Comandos para transferência==========================================
+
+O comando 'scp' é usado para enviar o arquivo para outra máquina
+	'scp backup.cpio paulo@192.168.1.12:~paulo/teste-bkp/'
+	
+Podemos gerar e enviar o arquivo de backup ao mesmo tempo
+	Ex:
+	'tar cf - /etc | ssh paulo@192.168.1.12 'cat > ~paulo/teste-bkp/backup.tar''
+	
+O comando 'rsync' permite sincronizar dois diretorios diferentes
+	'rsync -aruzv /etc paulo@192.168.1.12:~paulo/teste-bkp/'
+	--delete para sincronizar as exclusões
+	-e ssh para conectar usando SSH para transferência segura
+	
+
+101. 206.3 Notificar usuários do sistema===============================
+==Notificar usuários do sistema========================================
+
+O comando 'wall' envia uma mensagem para todos usuários dentro do 
+	sistema
+	'cat mensagem.txt | wall' envia uma mensagem de um texto
+	
+Temos os comando 'shutdown', 'reboot', 'halt', 'poweroff'
+
+O 'halt' irá parar o sistema sem tentar desligar o sistema
+O 'poweroff' irá parar e desligar o sistema
+
+O comando 'shutdown' programa o sistema para desligar em 1 min e 
+	envia uma mensagem para todos logados no sistema
+
+08:00

@@ -197,6 +197,12 @@ O comando 'lvs' ou 'lvdisplay' mostra os detalhes do logical volume
 072. 204.3 Logical Volume Manager======================================
 ==LVM Parte 2==========================================================
 
+Para redimensionar temos que adicionar o disco no PV.
+	'pvcreate /dev/sdb2'
+
+Adicionamos no VG
+	'vgextend <grupo> /dev/sdb2'
+
 Redimensionando o tamanho de um volume lógico usando o comando
 	'lvextend -L+5G <dispositivo>' para adicionar 5GB
 	'lvextend -L15G <dispositivo>' para totalizar 15GB

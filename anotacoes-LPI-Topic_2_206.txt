@@ -137,4 +137,18 @@ O 'poweroff' irá parar e desligar o sistema
 O comando 'shutdown' programa o sistema para desligar em 1 min e 
 	envia uma mensagem para todos logados no sistema
 
-08:00
+Podemos definir um tempo e escrever uma mensagem
+	Ex:
+	'shutdown -r +5 "Sistema será reiniciado"'
+
+Para enviar não enviar uma mensagem usamos --no-wall
+
+####
+Customizando as mensagems padrões do sistema
+O arquivo da mensagem de inicio antes do login ficam em
+'/etc/issue'
+'/etc/issue.net' #para logins remotos usando o ssh ou telnet
+
+Arquivo do message of the day '/etc/motd' é exibida após o 
+	usuário fazer login
+

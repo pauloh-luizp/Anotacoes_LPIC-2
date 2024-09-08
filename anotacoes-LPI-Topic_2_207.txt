@@ -1,0 +1,160 @@
+TÓPICO 207: Domain Name Server (DNS)===================================
+=======================================================================
+105. 207.1 Configurações Basica do Servidor DNS========================
+==Conceitos============================================================
+
+DNS = Domain Name System
+Sistema responsável por traduzir nomes de máquinas para IPs 
+  e vice e versa
+
+Temos o Root Domain ".";
+Depois os TLD (Top Level Domains)
+Logo depois os First Level Domains
+Por fim o Hosts/Subdomains
+
+Tipos de Name Servers (NS)
+  Primary (Master)
+    Obrigatório. Authoritative Server - Possui autoridade sobre o 
+      domínio
+
+  Secondary (Slave)
+    Opcional. Também considerado como "Authoritative Server".
+      Recebe as informações do Master
+
+  Caching
+    Opcional. Não tem autoridade sobre o domínio
+      Recebe as informações de outro NS (Master ou Slave) armazena
+      localmente, faz e retorna as consultas (recursivamente)
+
+  Forwarding
+    Opcional. Pode ser considerado um tipo de "caching server"
+      Encaminha a consulta para que outro servidor resolva e armazena
+      o resultado localmente em cache
+
+
+BIND - Berkely Internet Domain Server
+Servidor DNS Open Source
+Alternativas ao BIND: djbdns, dnsmasq, PowerDNS
+
+
+106. 207.1 Configurações Basica do Servidor DNS========================
+==Instalação e Caching Only============================================
+
+Para o CentOS instalamos os pacotes 'bind', 'bind-utils'
+Para o Debian instalamos os pacotes 'bind9', 'dns-utils' 
+
+Para o CentOS os arquivos ficam em '/etc/named.conf'
+Para o Debian os arquivos ficam em '/etc/bind/named.conf'
+
+No CentOS temos o diretório '/var/named' onde ficam as zonas DNS
+No Debian as zonas DNS ficam em '/etc/bind'
+
+No CentOS temos o arquivo '/var/named/named.ca' que contem os 
+  name server dos roots doamins "."
+No Debian o arquivo com o name server ficam em '/etc/bind/db.root'
+
+O DNS usa a porta 53 do protocolo UDP. Para transferencia de zonas 
+  é usado o TCP na porta 53.
+
+Para que o servidor funcione com Caching Only configuramos no 
+  arquivo '/etc/named.conf' colocamos:
+  "
+  zone "." IN {
+    type hint;
+    file "named.ca";
+  }
+  "
+
+Para reinciar a configuração do DNS podemos reiniciar o serviço pelo
+  systemctl, ou dar um 'kill -1 <PID>' ou usamos o 'rndc reload'
+
+  O rnc reload é um comando de controle do name server
+
+
+107. 207.1 Configurações Basica do Servidor DNS========================
+==Logging==============================================================
+
+Configuração padrão do logging
+  "
+  logging {
+    channel default_debug {
+      file "data/named.run";
+      severity dynamic;
+    };
+  };
+  "
+
+  Definimos um channel onde esse arquivo de log será escrito
+    definindo um nivel de severidade dos logs
+  "
+  channel paulo {
+    file "data/curso.log";
+    severity dynamic;
+  };
+  "
+  Definimos uma categoria e qual tipo de informação será escrita
+    no canal e qual é esse canal
+  "
+  category queries {
+    paulo;
+  };
+  "
+
+Temos um comando para verificar as configurações do named.conf
+  o comando 'named-checkconf' ou 'named-checkconf /etc/named.conf'
+
+
+109. 207.2 Criar e Manter Zonas de DNS===========================
+==Master=========================================================
+
+Criando uma Name Server Master
+Ex:
+  "
+  zone "dominioexemplo.com.br" IN {
+    type master:
+    file "dominioexemplo.zone";
+  };
+  "
+
+Temos que criar o nosso arquivo do tipo "dominio.zone" e nesse 
+  arquivo fazemos a configuração do dominio
+  No arquivo temos os seguintes parâmentros:
+
+  $TTL - tempo de expiração da informação de dominio no cliente
+  
+  Temos o a informação do SOA (Start of Authority)
+  O "@" é o nome do dominio
+  O "IN" é o tipo de registro
+  Logo depois temos o nome do Name Server
+  E depois o e-mail para contatar o responsável. O "@" do e-mail
+    é subistiuido pelo "."
+  ";" é o comentário
+  O serial é id sequencial que indica as mudanças
+  O refresh é o tempo que o servidor slave vai procurar por 
+    atualizações
+  O retry é caso o slave não consiga e qual o tempo que ele
+    irá tentar novamente
+  O expire é o tempo que a informação do slave vai expirar
+  O negative caching é o tempo que a resposta negativa vai ficar
+    em caching
+
+  Ainda nesse arquivo temos mais alguns outros parâmentros
+  Quando está em branco é o mesmo que ter "@  IN"
+  "NS" Name server
+  "MX" Mail exchange
+  "A" para informações de IPv4 de um dominio
+  "AAAA" para informações de IPv6 de um dominio
+    Glue record
+    "nameserer A <endereco IP>"
+  "CNAME" Canonial Name (Apelido)
+  "TXT" Para mandar uma informação de texto para quem consultar
+    o dominio
+
+Checando se a configuração do dominio está certa
+  'named-checkzone dominioexemplo.com.br /var/named/dominoexemplo.zone'
+
+
+110. 207.2 Criar e Manter Zonas de DNS===========================
+==Slave==========================================================
+
+

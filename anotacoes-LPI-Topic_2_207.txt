@@ -157,4 +157,246 @@ Checando se a configuração do dominio está certa
 110. 207.2 Criar e Manter Zonas de DNS===========================
 ==Slave==========================================================
 
+Configurando o Slave no Debian editamos o arquivo 
+  '/etc/bind/named.conf.local'
+
+  Incluimos a zona:
+  "
+  zone "dominioexemplo.com.br" {
+    type slave;
+    masters { 192.168.1.220; };
+    file "dominioexemplo.zone";
+  };
+  "
+
+Para ler arquivos .zone precisamos da ferramenta 
+  'named-compilezone'
+  Ex:
+    'named-compilezone -f raw -F text -o <arquivo de saida>.txt
+    <nome.do.dominio.com.br> <arquivo de zona>'
+
+O servidor Slave só baixa uma nova versão se o serial que ele
+  tem for menor do que está no servidor Master
+
+
+111. 207.2 Criar e Manter Zonas de DNS===========================
+==Forwarding=====================================================
+
+No Debian essa configuração é feita no 
+  '/etc/bind/named.conf.options'
+
+Colocamos a configuração no arquivo da seguinte forma, para
+  que tudo, exceto zonas internas seja redirecionadas para um
+  outro servidor
+  "
+  forwarders {
+    192.168.1.220; #IP de um servidor DNS que ele irá consultar
+  }
+  "
+
+Para que apenas uma pesquisa para um dominio seja redirecionada
+  para outro servidor. Configuramos no arquivo 
+  '/etc/bind/named.conf.options'
+  "
+  zone "dominoexemplo.com.br" IN {
+    type forward;
+    forwarders { 192.168.1.220; };
+  }:
+  "
+  Temos que desabilitar o dnssec-validation colocando como "no"
+  no mesmo arquivo de opitons
+
+
+112. 207.2 Criar e Manter Zonas de DNS===========================
+==DNS Reverso====================================================
+
+Ao fazermos uma consulta de dns reverso nos é retornado o IP 
+  ao contrário com por exemplo:
+  'host 149.20.4.15'
+  nos retorna:
+  15.4.20.149.in-addr.arpa domain name pointer mirror-isc3.debian.org
+
+Configurando o DNS reverso
+  "
+  zone "1.168.192.in-addr.arpa" IN {
+    type master;
+    file "1.168.192.in-addr.arpa.zone";
+  }:
+  "
+
+No arquivo de zona configuramos os registro reverso PTRs
+  Ex:
+  "
+  111 PTR  interno.dominoexemplo.com.br. #para o IP 192.168.1.111
+  "
+  
+
+114. 207.3 Segurança no Servidor DNS=============================
+==Configurações Gerais===========================================
+
+O servidor DNS não pode rodar com o usuário root
+
+Mante o servidor DNS atualizado, sempre rodando a ultima versão
+  Verificamos a versão usando o comando 
+  'rndc status' ou 'named -v'
+
+Como impedir que a versão aparece na consulta mal intesionada
+  No arquivo '/etc/bind/named.conf' trocamos a linha que contem
+  a versão colocando em 
+  "
+  options {
+    version "hidden";
+  }
+  "
+
+Outras configurações de seguranção são as opcões de "listen-on",
+  "allow-query"
+
+Temos a configuração de "blackhole" em que o servidor irá ignorar
+  todas a requisições vindas do IP especificado
+
+Podemos limitar o "recursion" para o servidor não pesquisar em 
+  outros servidores DNS de fora
+
+Podemos especficar quais IPs podem fazer as pesquisas recursivas
+  dizendo quais IPs estão em "allow-recrusion"
+
+Limiando quem pode fazer tranferencia de zonas configurando 
+  a opção "allow-transfer" especificando os IPs que podem fazer
+  transferencias. Podemos colocar a opção de "allow-transfer" 
+  dentro da configuração de um domino especifico
+
+Também é possível criar uma ACL, configurando fora do bloco de
+  options. Por exemplo:
+  "
+  acl "rede-interna" {
+    192.168.1.0/24;
+    192.168.2.0/24;
+  }
+  "
+
+É possivel a configuração de "views" limitando quem pode ver tais
+  zonas e dominios
+  Ex:
+  "
+  view exemplo1 {
+    match-clients { <acl ou IPs>;}
+
+    zone "." IN {
+
+    };
+
+    zone "dominioexemplo.com.br" IN {
+
+    };
+  };
+  "
+
+
+115. 207.3 Segurança no Servidor DNS=============================
+==TSIG===========================================================
+
+TSIG - Transaction Signature
+
+No TSIG definimos as chaves compartilhadas para que somente quem
+  tiver essas chaves consiga fazer a tranferência de zonas DNS
+
+Geramos a chave
+  'dnssec-keygen -a HMAC-MD5 -b 512 -r /dev/urandom
+  -n HOST dominioexemplo.com.br'
+  É ideal mudar o dono das chaves, alterando para um usuário 
+  diferente do root
+
+Colocamos a chave lá na configurações do named.conf
+  "
+  key chave {
+    algorithm HMAC-MD5;
+    secret "chavechavechavechave";
+  };
+  "
+
+Colocamos na configuração do "allow-transfer" dentro de options
+  a chave
+  "
+  allow-transfer { key chave; };
+  "
+
+Fazemos essa configuração também no Slave, incluindo a chave e
+  definimos que ao comunicar com o servidor Master usaremos a
+  chave
+  "
+  server 192.168.1.220 {
+    keys { chave; };
+  };
+  "
+
+Com isso a tranferência de zona será feita somente usando o
+  comando 'rndc retransfer <zona>'
+
+
+116. 207.3 Segurança no Servidor DNS=============================
+==DNSSEC=========================================================
+
+DNSSEC - BIND DNS Security Extensions
+
+As chaves privadas são usadas para assinar uma zona e essa zona
+  fonecem a chave publica para outros Name Servers que estão um
+  nivel acima
+
+As configurações para obter as chaves do niveis acima e dos
+  roots servers ficam em '/etc/bind/bind.keys' para o Debian
+  e em '/var/named/dynamic/managed-keys.bind'
+
+Assinando uma zona DNS no servidor BIND
+  'dnssec-keygen -a <algortimo> -b <Bytes> -r /dev/urandom
+  -n ZONE dominioexemplo.com.br'
+
+Colocamos a chave publica .key na configuração do dominio
+
+Depois assinamos a zona usando
+  'dnssec-sigzone -P -r /dev/urandom -o <dominio> 
+  <arquivo do dominio> <arquivo.private>'
+
+Será gerado um arquivo com o dominio assinado do tipo:
+  dominioexemplo.zone.signed
+  E um arquivo "dsset" exemplo:
+  dsset-dominioexemplo.com.br.
+
+Devemos mudar agora no named.conf a informação do domino
+  trocando o arquivo do dominio usando o arquivo .signed
+
+
+117. 207.3 Segurança no Servidor DNS=============================
+==DANE===========================================================
+
+DANE - DNS-based Authentication of Named Entities
+
+O DANE tem a tarefa de resolver uma falha na emissão das chaves
+  e dos certificados do CA
+  E se as unidades certificadoras forem comprometidas?
+    Podem gerar certificados legitimos para sites falso
+  A vunerabilidade vem de que é possivel usar qualquer CA para
+    validadar qualquer dominio
+  O DANE permite adicionar um registro na zona DNS informando
+    qual CA pode validar este dominio
+
+Usamos o site "www.huque.com/bin/gen_tlsa" para gerar um 
+  DNS TLSA Record
+  Esse registro gerado será colocado dentro da configuração do
+    nosso dominio
+
+
+118. 207.3 Segurança no Servidor DNS=============================
+==Enjaulamento de DNS============================================
+
+O Enajaulamento é fazer o DNS rodar independente do sistema 
+  operacional, o impedindo de acessar qualquer recurso fora dele
+  Quase semelhante a uma maquina virtual que roda apenas o DNS
+
+Para isso criamos um diretorio que será o novo diretorio root
+  o '/chroot' criando dentro do chroot os diretorios /dev, /etc
+  /lib, /usr e /var por exemplo
+
+No CentOS temos um pacote que auxilia muito nessa configuração
+  o pacote 'bind-chroot'
 

@@ -1,0 +1,168 @@
+TÓPICO 208: Manutenção do sistema======================================
+=======================================================================
+121. 208.1 Implementando um Web Server (Apache)========================
+==Instalação e comandos básicos========================================
+
+No Debian o pacote é o "apache2", o comando principal é o "apache"
+No CentOS o pacote é o "httpd", o comando principal é o "apache2ctl"
+
+Podemos gerenciar usando o comando "httpd"
+
+Os arquivos de configuração ficam em "/etc/httpd/" para o CentOS
+	e em "/etc/apache2/" para o Debian
+ 
+ 
+122. 208.1 Implementando um Web Server (Apache)========================
+==Principais Configurações=============================================
+
+No arquivo de configuração temos alguns parâmetros
+	ServerRoot - diretorio onde está as configurações do servidor
+	Listen - Permite definir a porta e quais IPs o apache irá ouvir
+	Include - Inclui a configuração e outros arquivos
+	User - Usuário que irá rodar o processo
+	Group - Grupo que irá rodar o processo
+	ServerAdmin - e-mail do administrador do sistema
+	DocumentRoot - onde estará os arquivos que serão servidos pelo
+		servidor web
+	StartServers - Define a quantidade de processos iniciais
+	MaxClients - Quantos clientes o servidor web vai tratar simultanea
+		mente
+	MinSpareServes - Estâncias reservas (padrão 5)
+	MaxSpareServes - Estâncias reservas (padrão 20)
+		Se existirem entre 5 e 20 ok, se passar de 20 o processo é
+		matado
+	MinSpareThread - Quantidade minima de threads
+	MaxSpareThread - Quantidade maxima de threads
+	ThreadsPerChild - Numero máximo de threads que cada filho vai ter
+		(padrão 25)
+	MaxRequestPerChild - Quantos request cada filho pode tratar no 
+		maximo
+	
+
+123. 208.1 Implementando um Web Server (Apache)========================
+==Modulos (phpperl)====================================================	
+
+O pacote PHP: no CentOS o pacote é o "php" no Debian "php5"
+
+O arquivo de configuração fica em '/etc/httpd/php.conf'
+
+Handler é um processo interno do Apache para gerenciar tipos especificos
+	de dados, blocos
+	
+O "AddType" diz qual contet type o php faz parte
+
+O "DirectoryIndex" é o arquivo que o php irá procurar
+
+Carregamos o modulo em 'conf.modules.d'
+
+
+O pacote Perl:
+	No CentOs temos que instalar o pacote 'epel-release' para depois
+		instalar o pacote 'mod_perl'
+	No Debian instalamos o pacote 'libapache2-mod-perl2'
+	
+Temos que definir o Alias do Perl alterando o parâmetro Alias
+Para que o apache interprete e gerencie os arquivos perl, descomenta
+	mos a seguinte configuração
+<Directory /var/www/perl>
+	SetHandler perl-script
+	PerlResponseHandler ModPerl::Registry
+	PerlOptions +ParseHeaders
+	Options +ExecCGI
+</Directory>
+
+
+124. 208.1 Implementando um Web Server (Apache)========================
+==Arquivos de Logs=====================================================
+
+Os logs ficam registrados em 'logs/error_log'
+O parâmetro é o "ErrorLog"
+O parâmetro "LogLevel" define o nivel do log que será registrado
+
+O parâmetro "LogFormat" define a maneira que os logs são registrados
+O parâmetro "CustonLog" definimos qual arquivo irá usar o LogFormat	
+	que criamos. Quando temos um "|" no inicio, signfica que ao invés
+	de registrar um log, será executado um comando.
+
+
+125. 208.1 Implementando um Web Server (Apache)========================
+==Controle de Acesso - Usuário=========================================
+
+Os controles de acesso são feitos pelos modulos *auth*
+
+Os modulos "authn" são os modulos de autenticação
+Os modulos "authz" são os modulos de autorização
+
+###Controlando por usuário e senha
+
+Criamos um arquivo contendo os usuários e as senhas
+
+Usamos o comando 'htpasswd -s -c /var/www/html/.htpasswd <usuario>'
+	-s definir o tipo de hash
+	-c para especificar o arquivo
+	
+Podemos especificar por grupos criando umm arquivo listando os grupos
+"
+suporte: aluno2 aluno3
+admin: ricardo aluno1
+"
+
+	
+Temos que autorizar o Apache a acessar o arquivo com os usuários e
+	com os grupos
+"
+<Directory /var/www/html>
+	Options Indexes FollowSymLinks
+	AllowOverride all
+	Require all granted
+</Directory>
+"
+	Indexes - permite usar os arquivos .index
+	FollowSymLinks - permite que o Apache siga os links simbolicos
+	AllowOverride - permite ler os arquivos de configuração
+	Require all granted - permite que todo mundo use aquele diretorio
+	
+Configurar para que seja usuado o arquivo dentro do site do Apache
+"
+<Directory /var/www/html/topsecret>
+	AuthType Basic 
+	AuthName "Area Secreta de Acesso"
+	AuthUserFile /var/www/html/topsecret/.htpasswd
+	AuthGroupFile /var/www/html/topsecret/.htgroup
+	Require valid-user
+</Directory>
+"
+
+Conferindo a sintaxe dos arquivos do Apache
+	'apachectl <arquivo>'
+	
+
+125. 208.1 Implementando um Web Server (Apache)========================
+==Controle de Acesso - IP==============================================
+
+Limitando acesso por IP forma antiga
+"
+<Directory /var/www/html/admin>
+	Order Deny, Allow
+	Deny from all
+	Allow from 192.168.1.210
+</Directory>
+"
+
+Limitando acesso por IP forma mais nova
+"
+<Directory /var/www/html/admin>
+	Require ip 192.168.1.210
+	Require ip 172.16 # tudo que começa por 172.16
+	Require host dominioexemplo.com.br
+</Directory>
+"
+
+"
+<Directory /var/www/html/admin>
+	<RequireAll>
+		Require all granted
+		Require not ip 192.168.1.210
+	</RequireAll>
+</Directory>
+"

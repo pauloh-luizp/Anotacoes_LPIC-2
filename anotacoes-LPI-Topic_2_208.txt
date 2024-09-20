@@ -166,3 +166,67 @@ Limitando acesso por IP forma mais nova
 	</RequireAll>
 </Directory>
 "
+
+127. 208.1 Implementando um Web Server (Apache)========================
+==Virtual Host=========================================================
+
+Permite ao Apache prover páginas diferentes quando o cliente chamar
+  por IPs diferentes
+
+Configuramos da seguinte forma:
+"
+<VirtualHost 192.168.1.221>
+  DocumentRoot /var/www/site1
+</VitualHost>
+
+<VirtualHost 192.168.1.222>
+  DocumentRoot /var/www/site2
+</VirtualHost>
+"
+
+Importante se atentar para o parâmetro "Listen"
+
+Configurando por dominio:
+  Usa-se o parâmetro ServerName
+"
+<VirtualHost 192.168.1.220>
+  ServerName www2.dominioexemplo.com.br
+  DocumentRoot /var/www/site1
+</VitualHost>
+
+<VirtualHost 192.168.1.220>
+  ServerName www3.dominioexemplo.com.br
+  DocumentRoot /var/www/site2
+</VirtualHost>
+"
+
+
+128. 208.1 Implementando um Web Server (Apache)========================
+==UserDir e Redirecionamentos==========================================
+
+O UserDir é um diretório padrão que estará presente na Home do usuário
+
+Redirecionamento e Alias
+"
+<VirtualHost 192.168.1.220>
+  ServerName www3.dominioexemplo.com.br
+  DocumentRoot /var/www/site2
+  Alias /docs /var/www/docs
+</VirtualHost>
+"
+
+Configurar também os parâmetros "Indexes" "FollowSymLinks"
+
+Com o parâmetro "AlliasMatch" podemos usar expressões regulares
+
+Usando redirect:
+"
+<VirtualHost 192.168.1.220>
+  ServerName www3.dominioexemplo.com.br
+  DocumentRoot /var/www/site2
+  Redirect /google http://www.google.com.br
+  Redirect /antigo.html /test.php
+</VirtualHost>
+"
+
+Com o parâmetro "RedirectMatch" podemos usar expressões regulares

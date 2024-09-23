@@ -230,3 +230,59 @@ Usando redirect:
 "
 
 Com o parâmetro "RedirectMatch" podemos usar expressões regulares
+
+131. 208.2 Configurações do Apache para HTTPS==========================
+==Gerando os Certificados==============================================
+
+Temos que habilitar o modulo SSL. Precisamos de dois pacotes:
+	'openssl' e o 'mod_ssl'
+	
+No arquivo '/httpd/conf.d/ssl.conf' temos a principais configurações
+	do SSL. Necessário ter as seguintes linhas de configuraçõa
+
+"
+Listen 443 https
+SSLEngine on
+"
+
+O SSLEngine é o parâmetro que habilita ou desabilita o SSL em um 
+	virtual host
+
+Geramos os certificados '/etc/ssl/certs' por padrão. Usamos o comando
+
+'openssl genrsa -des3 -out dominioexemplo.com.br.key 1024'
+
+Geramos o CSR
+
+'openssl req -new -key dominoexemplo.com.br.key
+	-out dominioexemplo.com.br.csr'
+	
+Assinamos o nosso proprio certificado
+Entramos no diretório '/etc/pki/CA'
+Usaremos o script '/etc/pki/tls/misc/CA.pl'
+
+Geramos um novo CA e um certificado de CA ao rodar o script
+
+Copiamos o arquivo do certificado ssl gerado para esse diretorio
+'cp /etc/ssl/certs/dominioexemplo.com.br.csr newreq.pem'
+
+Damos o comando para assinar o CSR
+'/etc/pki/tls/misc/CA.pl -signreq'
+
+Ao final temos o certificados que vamos usar no nosso domino
+Copiamos esse certificado para o antigo
+'cp newcert.pem /etc/ssl/certs/dominioexemplo.com.br.crt'
+
+
+132. 208.2 Configurações do Apache para HTTPS==========================
+==Instalando os certificados===========================================
+
+Entramos na configuração do httpd
+	'/etc/httpd/conf/httpd.conf'
+	
+A configuração do SSL tem que ser feito dentro da configuraçõa do
+	virtual hosts para a porta 443
+"
+<VirtualHost 192.168.1.220:443>
+	ServerName www.dominioexemplo.com.br
+

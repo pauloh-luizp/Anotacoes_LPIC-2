@@ -285,4 +285,52 @@ A configuração do SSL tem que ser feito dentro da configuraçõa do
 "
 <VirtualHost 192.168.1.220:443>
 	ServerName www.dominioexemplo.com.br
+DocumentRoot /var/www/html
+	SSLEngine on
+	SSLCertificateFile /etc/ssl/certs/dominioexemplo.com.br.crt
+	SSLCertificateKeyFile /etc/ssl/certs/dominioexemplo.com.br.key
+</VirtualHost>
+"
+
+Reiniciamos o Apache
+
+Podemos importar o certificado do CA para o navegador, ao importar
+	o arquivo cacert.pem
+	
+
+133. 208.2 Configurações do Apache para HTTPS==========================
+==Certificados de clientes=============================================
+
+É possivel limitar o acesso ao site para apenas os clientes que possue
+	determinado certificado
+
+Na configuração do VirtualHost adicionamos:
+	O <Directory> e o SSLCACertificateFile
+"
+<VirtualHost 192.168.1.220:443>
+	ServerName www.dominioexemplo.com.br
+	DocumentRoot /var/www/html
+	SSLEngine on
+	SSLCertificateFile /etc/ssl/certs/dominioexemplo.com.br.crt
+	SSLCertificateKeyFile /etc/ssl/certs/dominioexemplo.com.br.key
+	SSLCACertificateFile /etc/ssl/certs/cacert.pem
+	<Directory /var/www/html/cert>
+		SSLVerifyClient require
+	</Directory>
+</VirtualHost>
+"
+
+Geramos uma chave para o usuário
+'openssl genrsa -des3 -out usuario.key 2048'
+
+Copiamos o certificado para a pasta dos certificados e rodamos o script
+'cp /etc/ssl/certs/usuario.csr newreq.pem'
+'/etc/pki/tls/misc/CA.pl -signreq'
+
+Temos que gerar um certificado do tipo p12 que contem o certificado
+	a chave juntos para ser importado no navegador
+'openssl pkcs12 -export -inkey usuario.key -in usuario.crt -out usuario.p12'
+
+Copiamos esse arquivo para o cliente e importamos para o navegador
+	do cliente
 

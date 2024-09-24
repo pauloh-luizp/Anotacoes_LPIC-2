@@ -334,3 +334,192 @@ Temos que gerar um certificado do tipo p12 que contem o certificado
 Copiamos esse arquivo para o cliente e importamos para o navegador
 	do cliente
 
+134. 208.2 Configurações do Apache para HTTPS==========================
+==Configurações de segurança===========================================
+
+As configurações de segurança ficam em '/etc/httpd/conf.d/ssl.conf'
+
+No parâmetro "SSLProtocol" definimos quais protocolos o servidor irá
+	aceitar
+	
+O parâmetro "SSLCipherSuite" definimos quais algoritmos de criptografia
+	que permitimos o uso. O que tem "!" antes não são aceitos
+	
+O parâmetro "SSLHonorCipherOrder" define que será seguido a ordem 
+	definida no parâmetro "SSLCipherSuite"
+	
+Obtendo a versão do Apache atraves de uma requisição no navegador
+	'curl --head http://192.168.1.220'
+	
+Podemos limitar essas infomações que aparecem ao requistarmos pelo curl
+Na configuração do ssl.conf setamos o parametro "ServerTokens" com 
+	'ServerTokens Prod' o padrão é "Full", mas temos também o "OS"
+	
+Outra configuração é referente as mensagens de erros informadas pelo 
+	servidor. O parâmetro "ServerSignature" define essa configuração
+	podemos setar como "On", "Off" (padrão) ou "email"
+	
+Com o Apache podemos obter um Trace das requisições usando o curl
+	'curl -v -X TRACE http://192.168.1.220'
+	Trocamos o parametro "TraceEnable" para Off
+
+
+135. 208.2 Configurações do Apache para HTTPS==========================
+==SNI==================================================================
+
+SNI (Server Name Indicator). É uma extensão do SSL/TLS que possibilita
+	o uso de VirtualHost por nomes em acessos HTTPS. Com esse recurso
+	o cliente (navegador) inclui o endereço no estabelecimento da 
+	conexão SSL/TLS (handshake)
+	
+
+137. 208.3 Implementando um Servidor Proxy (Squid)=====================
+==Instalação e Configuração============================================
+
+Principais recursos:
+	Cache: Melhoria da performance e velocidade no acesso
+	Filtros/Bloqueios: Permite definir o que pode ser acessado quem e
+		quando e etc
+	Autenticação de usuários
+
+Instalado o squid usando o pacote 'squid' ou 'squid3'
+
+Os logs ficam em '/var/log/squid'
+
+O comando principal é 'squid'
+	-v para ver a versão
+	-k permite uma serie de operações como '-k reconfigure'
+	-z para recriar a estrutura de diretórios
+	
+O arquivo de configuração fica em '/etc/squid/squid.conf'
+	O parâmetro que define a porta é o "http_port"
+
+
+138. 208.3 Implementando um Servidor Proxy (Squid)=====================
+==Cache================================================================
+
+Configuramos em '/etc/squid/squid.conf' no parâmetro "cache_dir"
+	'cache_dir ufs /var/spool/squid 100 16 256'
+	o "ufs" é o tipo de armazenamento
+	"/var/spool/squid" é o diretório que será armazenado o cache
+	"100" quantidade maxima em MB que será armazenado
+	"16" é a estrutura de diretorio com 16 diretorios principais
+	"256" é a quantidade de subdiretorios
+	
+Damos o comando 'squid -z' para recriar estrutura de diretorios
+
+
+139. 208.3 Implementando um Servidor Proxy (Squid)=====================
+==Controle de acesso===================================================
+
+As configurações também ficam em '/etc/squid/squid.conf'. Configuramos
+	ACLS
+
+Como se define uma ACL:
+	'acl localnet src 10.0.0.8/8'
+	"localnet" nome da acl
+	"src" tipo de acl
+	"10.0.0.8/8" valores ou lista de valores separado por espaço ou
+		em linhas separadas, ou o uso de um arquivo
+
+Tipos de ACLS
+	src: IP/REDE
+	dst: IP/REDE
+	srcdomain: .google.com	
+	dstdomain: 
+	port:
+	proto:
+	browser:
+	time: S (Domingo), M (Segunda), T (Terça), W (Quarta), H (Quinta)
+		F (Sexta) e A (Sabado)
+	url_regex: busca a expressão por toda a url
+	urlpath_regex: busca a expressão somente depois do dominio
+	
+Usamos essas ACLs através do parâmetro "http_access"
+	'http_access deny !Safe_ports'
+	
+
+140. 208.3 Implementando um Servidor Proxy (Squid)=====================
+==Autenticação=========================================================
+
+Definimos os parâmetros que serão utilizados nessa autenticação com o 
+	parâmetro "auth_param"
+	'auth_param basic realm Por favor se identifique-se' #mensagem
+	'auth_param basic program /usr/lib64/squid/basic_ncsa_auth
+		/etc/squid/passwords' #arquivo que será usado
+		
+A autenticação será definida pelo arquivo do 'htpasswd' 
+Ex:
+	'htpasswd /etc/squid/passwords paulo'
+	
+
+142. 208.4 Implementando o NGINX como WebServer e Proxy Reverso========
+==Configurações========================================================
+
+O NGINX é um servidor Web e Proxy Reverso. No proxy reverso as 
+	requisições da internet chegam primeiro no proxy, para depois o 
+	proxy redistribuir para os servidores internos
+	
+Para instalar requistamos o pacote 'nginx'
+
+Os arquivos de configuração ficam em '/etc/nginx'
+
+As principais configurações dentro do nginx.conf: 
+	As configurações são divididas em blocos
+	Dentro do bloco "HTTP" temos o bloco "Server" onde está as 
+		configurações do servidor
+	"listen" é a porta que ele irá ouvir
+	"server_name" onde especificamos o nome do servidor
+	"root" semelhante ao documentroot do apache, é onde o nginx irá
+		buscar as informações
+	"index" especificamos quais os arquivos de index que iremos usar
+	
+Temos o comando 'nginx' para certas configurações
+	-v para versões
+	-t para testar as configurações
+	-s <sinal> como stop/quit/reload/reopen
+
+
+143. 208.4 Implementando o NGINX como WebServer e Proxy Reverso========
+==FastCGI PHP==========================================================
+
+O FastCGI é um tipo de protocolo de interface entre o servidor web
+	e o programa o script
+	
+Temos que instalar o pacote 'php-fpm'
+
+Para configurar no nginx:
+	"
+	location ~ \.php$ {
+		fastcgi_pass localhost:9000;
+		fastcgi_param QUERY_STRING; #para passar parâmetros
+	}
+	"
+
+A configuração do php-fpm fica em '/etc/php-fpm.d/www.conf'
+
+
+144. 208.4 Implementando o NGINX como WebServer e Proxy Reverso========
+==Proxy Reverso========================================================
+
+Configuramos da seguinte forma:
+"
+location / {
+	proxy_pass http:192.168.1.220:80; #endereço de encaminhamento
+	proxy_set_header X-Real-IP $remote_addr; #parametros que alteramos
+}
+"
+
+Para encaminhar para varios servidores Web. Dentro do bloco http 
+	criamos o bloco "upstream backend" e nele definimos os servers
+"
+http {
+	upstream backend {
+		server 192.168.1.210;
+		server 192.168.1.220;
+	}
+}
+"
+	Alteramos o parâmetro "proxy_pass" colocando:
+	'proxy_pass http://backend;'
+

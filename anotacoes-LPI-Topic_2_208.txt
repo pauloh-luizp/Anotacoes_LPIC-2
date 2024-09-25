@@ -42,7 +42,7 @@ No arquivo de configuração temos alguns parâmetros
 123. 208.1 Implementando um Web Server (Apache)========================
 ==Modulos (phpperl)====================================================	
 
-O pacote PHP: no CentOS o pacote é o "php" no Debian "php5"
+O pacote PHP: no CentOS o pacote é o "php" no Debian "php"
 
 O arquivo de configuração fica em '/etc/httpd/php.conf'
 

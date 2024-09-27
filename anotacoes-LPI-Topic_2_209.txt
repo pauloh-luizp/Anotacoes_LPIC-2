@@ -1,0 +1,304 @@
+TÓPICO 209: Compartilhamento de arquivos===============================
+=======================================================================
+147. 209.1 Configuração do Servidor Samba==============================
+==Introdução===========================================================
+
+Instalando o Samba precisamos dos pacotes 'samba' e 'samba-client'
+
+O samba utiliza dois processos, o smdb e o processo nmdb
+	O smdb é para compartilhamento de diretório e impressoras
+	O nmdb trata o nome net bios
+	
+O smdb utiliza as portas 139 e 445 do protocolo TCP
+O nmdb utiliza as portas 137 e 138 do protocolo UDP
+
+Os logs do Samba ficam em '/var/log/samba'
+
+A configuração do Samba fica em '/etc/samba/smb.conf'
+
+
+148. 209.1 Configuração do Servidor Samba==============================
+==Compartilhamento de diretórios=======================================
+
+comment - nome que será dado ao compartilhamento
+browseable - será possivel achar navegando pela estrutura de diretorios
+read only - se será somente leitura
+valid users - com o %S somente o usuário poderá logar no seu home
+
+Criando usuário no Samba com o comando 'smbpasswd'
+	-a para adicionar um usuário
+	-x para remover um usuário
+	-d para desabilitar o usuário
+	-e para habiliar o usuário
+	
+Para listar os usuários criados usamos o comando 'pdbedit'
+
+O comando 'testparm' checa as configurações feitas no smdb.conf
+	-v verbose, mostra todas as definições do samba mesmo que não
+		configuradas e que não aparecem no smdb.conf
+
+Para logar com o usuário utilizamos o comando 'smbclient'
+	'smbclient //192.168.1.210/caminho -U <usuario>'
+	A opção -L lista o que o usuário tem acesso
+	
+O comando 'smbstataus' mostra todos o usuários conectados
+
+Exemplo de compartilhamento
+"
+[Publico]
+	comment = Compartilhamento publico
+	path = /tmp
+	browseable = yes
+	writeable = yes
+	guest ok = yes
+"
+
+O "$" no final do nome do compartilhamento torna-o oculto para o Windows
+
+
+149. 209.1 Configuração do Servidor Samba==============================
+==Montagem remota de compartilhamento==================================
+
+Precisamos instalar um pacote 'cifs-utils'
+
+Montando um diretorio com o mount junto como cifs-utils
+	'mount -t cifs -o username=ricardo,password=123456 
+	 //192.168.1.210/Logs /mnt/teste-samba'
+	 
+Configurando a montagem no fstab
+"
+//192.168.1.210/Logs	/mnt/teste-samba	cifs	user,credentials=/home/ricardo/acesso	0	0
+"
+
+150. 209.1 Configuração do Servidor Samba==============================
+==Compartilhamento de impressoras======================================
+
+Temos que usar o nome "printers"
+"
+[printers]
+	comment = All Printers
+	browseable = no
+	path = /var/spool/samba
+	printable = yes
+	guest ok = no
+	read only = yes
+	create mask = 0700
+"
+
+Compartilhamento do driver da impressora
+"
+[print$]
+	comment = Printer Drivers
+	path = /var/lib/samba/printers
+	browseable = yes
+	read only = yes
+	guest ok = no
+"
+
+
+151. 209.1 Configuração do Servidor Samba==============================
+==Mapeamento de usuários===============================================
+
+Adicionamos na configuração do Samba a entrada especificando o arquivo
+	que conterá o mapeamento dos usuários
+"
+[global]
+	username map = /etc/samba/username.map
+"
+
+No arquivo colocamos primeiro o usuário do Samba e depoi o usuário que
+	vai ser informado na hora do login
+"paulo = paulo.pereira"
+
+
+152. 209.1 Configuração do Servidor Samba==============================
+==Configurações de segurança===========================================
+
+Existem 5 modos principais de segurança, definido pelo parâmetro 
+	security na seção de Global
+	
+O primeiro modo é o "User-Level Security". Nesse nível o Samba pede
+	o usuário e senha ao logar
+	"
+	[GLOBAL]
+	security = user
+	"
+
+O segundo modo é o "Domain Security Mode". O servidor Samba será
+	autenticado por um servidor de dominio
+	"
+	[GLOBAL]
+	security = domain
+	workgroup = WORKGROUP
+	"
+
+O terceiro modo é o "Active Directory Security Mode". Ness modo
+	o Samba vai entrar no servidor de dominio, fazendo parte desse
+	servidor de dominio
+	"
+	[GLOBAL]
+	security = ADS
+	realm = EXAMPLE.COM 
+	password server = kerbero.exemple.com
+	"
+
+O quarto modo é o "Server Security Mode". Utiliza um outro servidor
+	para fazer autenticação
+	"
+	[GLOBAL]
+	encrypt passwords = Yes
+	security = server
+	password server = "NetBIOS_of_Domain_Controller"
+	"
+	
+O quinto modo é o "Share-Level Security". Ao invés de senhas
+	temos o acesso por compartilhamento
+	"
+	[GLOBAL]
+	security = share
+	"
+	
+
+153. 209.1 Configuração do Servidor Samba==============================
+==Ingressando o Samba como membro do AD================================
+
+Temos que instalar o pacote 'winbind'. Serve para que o Samba exerge
+	os usuários de um servidor AD
+	
+Precisamos também dos pacotes 'libpam-winbind', 'libnss-winbind'
+	'krb5-config'
+	
+Precisamos configurar '/etc/nsswitch.conf' para considerar os usuários
+	do AD. Adicionamos no arquivo o winbd
+"
+passwd: compat winbd
+group: compat winbd
+"
+
+Colocamos no '/etc/resolv.conf' o servidor DNS do nameserver do sevidor AD
+
+Na configuração do Samba colocamos
+"
+[global]
+	security = ads
+	workgroup = DOMINIOEXEMPLO
+	realm = dominioexemplo.com.br
+	netbios name = server-samba #nome da maquina netbios
+"
+
+Configuramos no arquivo '/etc/pam.d/common-session' adicionando a linha
+"
+session optional	pam_mknomedir.so skel=/etc/skel umask=077
+"
+
+Reiniciamos o Samba e os demais serviços
+	'systemctl restart winbind nmbd smbd'
+	
+
+Para ingressar no dominio usamos o comando 'net'
+	'net ads join -U Administrator'
+	
+Checamos a entrada no dominio com o comando 'wbinfo --ping-dc' ou com
+	'wbinfo -u'
+	
+
+154. 209.1 Configuração do Servidor Samba==============================
+==Comandos=============================================================
+
+O comando 'nmblookup' é usado para ver o nome dos servidores pela 
+	resolução de nome NetBIOS 
+	-S <nome_do_servidor> # para consultar pelo nome da maquina
+	-A <IP) # para consultar pelo IP
+	
+O comando 'samba-tool' é uma ferramenta de administração do Samba
+	muito utilizada quando o Samba está no modo SBC
+	process - para listar os processos
+	
+O comando 'smbcontrol' é usado para controle do processos smbd, nmdb 
+	ou winbindd
+	
+O comando 'net' para administrar o Samba e os servidores remotos CIFS
+	
+
+156. 209.2 Configuração do Servidor NFS================================
+==Introdução===========================================================
+	
+O NFS é um protocolo de compartilhamento de arquivos, que permite
+	que montar um diretorio remoto localmente e funciona como cliente 
+	e servidor
+	
+Instalando o NFS. No Debian instalamo os pacotes 'rpcbind' 'nfs-common'
+	'nfs-kernel-server'. No CentOS instalamos os pacotes 'nfs-utils'
+	'rpc-bind'.
+
+No Debian iniciamos os serviços 'rpcbind' e 'nfs-server'
+No CentOS iniciamos os serviços 'rpcbind' e 'nfs-server'
+
+O comando 'showmount -e' e 'rcpinfo -p' mostra os mapeamentos e os
+	serviços rodando
+	
+O cliente consulta do servidor na porta 111 (porta do portmapper).
+	Cada vez que iniciamos o sistema o mountd roda em uma porta dirente
+	e o portmapper informa ao cliente qual porta o serviço está funcionando
+	
+Outros dois processos principais são o 'nfs' e 'mount'
+
+No Debian as configurações ficam em '/etc/default/nfs-common'
+	e em '/etc/default/nfs-kernel-server'
+	
+No arquivo 'nfs-common' podemos fixar um porta usando o parâmetro 
+	STATDOPTS=
+
+No arquivo 'nfs-kernel-server' podemos fixar um porta usando o parâmetro 
+	RPCMOUNTDOPTS=
+	
+No CentOS as configurações ficam '/etc/sysconfig'
+
+
+157. 209.2 Configuração do Servidor NFS================================
+==Compartilhamento e montagem==========================================
+
+A configuração do compartilhamento fica em '/etc/exports'
+Acrescentamos no arquivo a configuração da seguinte forma:
+"
+/var/log	192.168.1.210(<opções>)
+"
+
+Opções:
+	rw - permissão de escrita
+	ro - somente leitura
+	sync - feito o request da operação e só retorna depois de ter 
+		realizado a operação
+	async - armazena os requests e faz a operações quando possivel
+	no_subtree_check - feito quando montamos um diretorio dentro de uma
+		partição. A cada requisição do cliente, o servidor checa se
+		que o diretorio ainda está lá
+	root_squash - quando o cliente faz um acesso como root o acesso 
+		feito no servidor é feito de forma anonima.
+		Transfoma o usuário root em usuário anonimo no servidor (padrão)
+	no_root_squash - não torna o usuário root como anonimo
+	all_squash - faz o mesmo do root_squash só que para usuários normais
+
+Aplicamos as configurações feitas usando o comando 'exportfs -a'
+	-v para mostar mais detalhes
+	-r para reexportar
+	-ua para desfazer o export 
+
+Para fazer um exportação unica podemos usar também o 'exportfs'. Ex:
+	'exportfs 192.168.1.220:/etc -o ro,sync'
+
+Montamos o diretórios da mesma forma que fazemos com qualquer outro 
+	compartilhamento de filesystem. Ex:
+	'mount -t nfs 192.168.1.210:/var/log /mnt/nfs'
+	
+O comando 'nfsstat' mostra estatisticas sobre o NFSS
+
+
+159. 209.2 Configuração do Servidor NFS================================
+==Configurações e segurança============================================
+
+O NFSv4 usa um pseudo filesystem. Em que podemos montar um diretório
+	compartilhado em outro local. Podemos usar a opção fsid=0.
+	
+Para desabiltar o NFSv4 vamos em '/etc/default/nfs-kernel-server'
+	No parâemtro RPCMOUNTDOPTS="--no-nfs-version 4"
